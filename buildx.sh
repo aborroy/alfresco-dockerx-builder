@@ -17,6 +17,9 @@ do
     }
 done
 
+# Configuration
+REPOSITORY=alfresco
+
 # Docker Images building flags
 REPO="false"
 REPO_ENT="false"
@@ -50,7 +53,7 @@ function build {
     && unzip alfresco-share-base-distribution-*.zip
     cp alfresco-share-base-distribution-*/amps/* target/amps
     sed -i '' 's/alfresco-base-tomcat:tomcat9-jre11-centos7.*/alfresco-base-tomcat:tomcat9-jre11-centos7-202209261711/g' Dockerfile
-    docker buildx build . --load --platform linux/arm64 -t alfresco/alfresco-content-repository-community:$REPO_COM_VERSION
+    docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-content-repository-community:$REPO_COM_VERSION
     cd ../../..
   fi
 
@@ -74,7 +77,7 @@ function build {
     && unzip alfresco-share-base-distribution-*.zip
     cp alfresco-share-base-distribution-*/amps/* target/amps
     sed -i '' 's/alfresco-base-tomcat:tomcat9-jre11-centos7.*/alfresco-base-tomcat:tomcat9-jre11-centos7-202209261711/g' Dockerfile
-    docker buildx build . --load --platform linux/arm64 -t quay.io/alfresco/alfresco-content-repository:$REPO_ENT_VERSION
+    docker buildx build . --load --platform linux/arm64 -t quay.io/$REPOSITORY/alfresco-content-repository:$REPO_ENT_VERSION
     cd ../../..
   fi
 
@@ -89,7 +92,7 @@ function build {
     cd ..
     
     cd share
-    docker buildx build . --load --platform linux/arm64 --build-arg SHARE_INTERNAL_VERSION=$SHARE_COM_VERSION -t alfresco/alfresco-share:$SHARE_VERSION
+    docker buildx build . --load --platform linux/arm64 --build-arg SHARE_INTERNAL_VERSION=$SHARE_COM_VERSION -t $REPOSITORY/alfresco-share:$SHARE_VERSION
     cd ..
   fi
 
@@ -104,7 +107,7 @@ function build {
     cd ..
     
     cd share
-    docker buildx build . --load --platform linux/arm64 --build-arg SHARE_INTERNAL_VERSION=$SHARE_ENT_VERSION -t alfresco/alfresco-share:$SHARE_VERSION
+    docker buildx build . --load --platform linux/arm64 --build-arg SHARE_INTERNAL_VERSION=$SHARE_ENT_VERSION -t quay.io/$REPOSITORY/alfresco-share:$SHARE_VERSION
     cd ..
   fi  
 
@@ -118,7 +121,7 @@ function build {
     cd packaging/target/docker-resources
     sed -i '' 's/download.yourkit.com/archive.yourkit.com/g' Dockerfile
     sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk11-rockylinux8/g' Dockerfile
-    docker buildx build . --load --platform linux/arm64 -t alfresco/alfresco-search-services:$SEARCH_VERSION
+    docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-search-services:$SEARCH_VERSION
     cd ../../../..
   fi
 
@@ -132,7 +135,7 @@ function build {
     cd packaging/target/docker-resources
     sed -i '' 's/download.yourkit.com/archive.yourkit.com/g' Dockerfile
     sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk11-rockylinux8/g' Dockerfile
-    docker buildx build . --load --platform linux/arm64 -t alfresco/alfresco-search-services:$SEARCH_ENT_VERSION
+    docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-search-services:$SEARCH_ENT_VERSION
     cd ../../../..
   fi
 
@@ -149,7 +152,7 @@ function build {
     git checkout $ACA_VERSION
     npm install
     npm run build
-    docker buildx build . --load --platform linux/arm64 --build-arg PROJECT_NAME=content-ce -t alfresco/alfresco-content-app:$ACA_VERSION
+    docker buildx build . --load --platform linux/arm64 --build-arg PROJECT_NAME=content-ce -t $REPOSITORY/alfresco-content-app:$ACA_VERSION
     cd ..
   fi
 
@@ -159,7 +162,7 @@ function build {
     git clone git@github.com:Alfresco/acs-ingress.git
     cd acs-ingress
     git checkout $PROXY_VERSION
-    docker buildx build . --load --platform linux/arm64 -t alfresco/alfresco-acs-nginx:$PROXY_VERSION
+    docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-acs-nginx:$PROXY_VERSION
     cd ..
   fi
 
