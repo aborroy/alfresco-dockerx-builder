@@ -37,7 +37,7 @@ $ ./buildx.sh [repo VERSION] [proxy VERSION] [share VERSION] [search VERSION] [a
 The process will take a while, but it will pull to your local Docker Repository all the Images selected by using the same tag name provided by Alfresco.
 
 ```
-$ ./buildx.sh repo 7.3.0 share 7.3.0 search 2.0.3 aca 3.1.0
+$ ./buildx.sh repo 7.3.0 share 7.3.0 search 2.0.3 transform 3.0.0 aca 3.1.0
 
 ...
 
