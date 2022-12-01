@@ -120,7 +120,7 @@ function build {
     mvn clean install -DskipTests
     cd packaging/target/docker-resources
     sed -i '' 's/download.yourkit.com/archive.yourkit.com/g' Dockerfile
-    sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk11-rockylinux8/g' Dockerfile
+    sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk17-rockylinux8/g' Dockerfile
     docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-search-services:$SEARCH_VERSION
     cd ../../../..
   fi
@@ -134,14 +134,16 @@ function build {
     mvn clean install -DskipTests
     cd packaging/target/docker-resources
     sed -i '' 's/download.yourkit.com/archive.yourkit.com/g' Dockerfile
-    sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk11-rockylinux8/g' Dockerfile
+    sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk17-rockylinux8/g' Dockerfile
     docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-search-services:$SEARCH_ENT_VERSION
     cd ../../../..
   fi
 
   # Transform Service (TBD)
   if [ "$TRANSFORM" == "true" ]; then
-    echo "Not supported!"
+    cd transform
+    docker buildx build . --load --platform linux/arm64 --build-arg TRANSFORM_VERSION=$TRANSFORM_VERSION -t $REPOSITORY/alfresco-transform-core-aio:$TRANSFORM_VERSION
+    cd ..
   fi
 
   # ACA
@@ -225,6 +227,12 @@ do
             ACA_VERSION=$1
             shift
         ;;
+        transform)
+            TRANSFORM="true"
+            shift
+            TRANSFORM_VERSION=$1
+            shift
+        ;;
         proxy)
             PROXY="true"
             shift
@@ -241,6 +249,7 @@ do
             echo "  search VERSION"
             echo "  search-ent VERSION"
             echo "  aca VERSION"
+            echo "  transform VERSION"
             echo "  proxy VERSION"
             exit 1
         ;;
