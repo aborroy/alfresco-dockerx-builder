@@ -62,6 +62,7 @@ function build {
     cd acs-packaging
     git checkout $REPO_ENT_VERSION
     REPO_VERSION=$(ggrep -oP '(?<=<dependency.alfresco-enterprise-repo.version>).*?(?=</dependency.alfresco-enterprise-repo.version>)' pom.xml)
+    SHARE_INTERNAL_VERSION=$(ggrep -oP '(?<=<dependency.alfresco-enterprise-share.version>).*?(?=</dependency.alfresco-enterprise-share.version>)' pom.xml)
 
     rm -rf alfresco-enterprise-repo
     git clone git@github.com:Alfresco/alfresco-enterprise-repo.git
@@ -69,6 +70,9 @@ function build {
     git checkout $REPO_VERSION
     mvn clean install -DskipTests
     cd packaging/docker-alfresco
+    wget https://nexus.alfresco.com/nexus/service/local/repo_groups/public/content/org/alfresco/alfresco-share-base-distribution/$SHARE_INTERNAL_VERSION/alfresco-share-base-distribution-$SHARE_INTERNAL_VERSION.zip \
+    && unzip alfresco-share-base-distribution-*.zip
+    cp alfresco-share-base-distribution-*/amps/* target/amps
     sed -i '' 's/alfresco-base-tomcat:tomcat9-jre11-centos7.*/alfresco-base-tomcat:tomcat9-jre11-centos7-202209261711/g' Dockerfile
     docker buildx build . --load --platform linux/arm64 -t quay.io/alfresco/alfresco-content-repository:$REPO_ENT_VERSION
     cd ../../..
