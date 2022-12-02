@@ -24,7 +24,8 @@ ARG GROUPID=1000
 ARG AIOUSERNAME=transform-all-in-one
 ARG USERID=33017
 
-RUN yum -y update && yum -y install wget unzip libreoffice-core
+RUN yum -y update && yum -y install wget cairo cups-libs libSM libGLU
+RUN yum -y install --skip-broken libreoffice-*
 RUN dnf install epel-release -y && dnf config-manager --set-enabled powertools && \
     dnf install -y ImageMagick ImageMagick-devel && dnf -y install perl-Image-ExifTool
 
