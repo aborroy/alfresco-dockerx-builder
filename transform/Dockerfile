@@ -29,6 +29,7 @@ RUN yum -y install --skip-broken libreoffice-*
 RUN dnf install epel-release -y && dnf config-manager --set-enabled powertools && \
     dnf install -y ImageMagick ImageMagick-devel && dnf -y install perl-Image-ExifTool
 
+RUN ln -s /usr/lib64/ImageMagick-7.0.10 /usr/lib64/ImageMagick-6.9.12
 RUN ln -s /usr/lib64/libreoffice /opt/libreoffice7.2
 
 RUN curl -s -S $ALFRESCO_PDF_RENDERER_LIB_RPM_URL -o alfresco-pdf-renderer-linux.tgz && \
