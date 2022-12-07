@@ -19,6 +19,8 @@ done
 
 # Configuration
 REPOSITORY=alfresco
+NEXUS_USER=
+NEXUS_PASS=
 
 # Docker Images building flags
 REPO="false"
@@ -59,26 +61,13 @@ function build {
 
   # Repository Enterprise
   if [ "$REPO_ENT" == "true" ]; then
-
-    rm -rf acs-packaging
-    git clone git@github.com:Alfresco/acs-packaging.git
-    cd acs-packaging
-    git checkout $REPO_ENT_VERSION
-    REPO_VERSION=$(ggrep -oP '(?<=<dependency.alfresco-enterprise-repo.version>).*?(?=</dependency.alfresco-enterprise-repo.version>)' pom.xml)
-    SHARE_INTERNAL_VERSION=$(ggrep -oP '(?<=<dependency.alfresco-enterprise-share.version>).*?(?=</dependency.alfresco-enterprise-share.version>)' pom.xml)
-
-    rm -rf alfresco-enterprise-repo
-    git clone git@github.com:Alfresco/alfresco-enterprise-repo.git
-    cd alfresco-enterprise-repo
-    git checkout $REPO_VERSION
-    mvn clean install -DskipTests
-    cd packaging/docker-alfresco
-    wget https://nexus.alfresco.com/nexus/service/local/repo_groups/public/content/org/alfresco/alfresco-share-base-distribution/$SHARE_INTERNAL_VERSION/alfresco-share-base-distribution-$SHARE_INTERNAL_VERSION.zip \
-    && unzip alfresco-share-base-distribution-*.zip
-    cp alfresco-share-base-distribution-*/amps/* target/amps
-    sed -i '' 's/alfresco-base-tomcat:tomcat9-jre11-centos7.*/alfresco-base-tomcat:tomcat9-jre11-centos7-202209261711/g' Dockerfile
-    docker buildx build . --load --platform linux/arm64 -t quay.io/$REPOSITORY/alfresco-content-repository:$REPO_ENT_VERSION
-    cd ../../..
+    cd repo
+    docker buildx build . --load --platform linux/arm64 \
+    --build-arg ALFRESCO_VERSION=$REPO_ENT_VERSION \
+    --build-arg NEXUS_USER=$NEXUS_USER \
+    --build-arg NEXUS_PASS=$NEXUS_PASS \
+    -t quay.io/$REPOSITORY/alfresco-content-repository:$REPO_ENT_VERSION
+    cd ..
   fi
 
   # Share
@@ -122,10 +111,10 @@ function build {
     sed -i '' 's/download.yourkit.com/archive.yourkit.com/g' Dockerfile
     sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk17-rockylinux8/g' Dockerfile
     docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-search-services:$SEARCH_VERSION
-    cd ../../../..
+    cd ../../../../..
   fi
 
-  # Search Services Enterprise
+  # Search Services Enterprise (TBD)
   if [ "$SEARCH_ENT" == "true" ]; then
     rm -rf InsightEngine
     git clone git@github.com:Alfresco/InsightEngine.git
@@ -136,7 +125,7 @@ function build {
     sed -i '' 's/download.yourkit.com/archive.yourkit.com/g' Dockerfile
     sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk17-rockylinux8/g' Dockerfile
     docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-search-services:$SEARCH_ENT_VERSION
-    cd ../../../..
+    cd ../../../../..
   fi
 
   # Transform Service (TBD)

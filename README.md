@@ -46,11 +46,12 @@ alfresco/alfresco-search-services               2.0.3     ed75b40d7c8f   7 minut
 alfresco/alfresco-share                         7.3.0     318e3d6b4426   17 hours ago         1.85GB
 alfresco/alfresco-content-repository-community  7.3.0     b5974502c4d9   8 minutes ago        957MB
 alfresco/alfresco-content-app                   3.1.0     ea083a198161   17 hours ago         84.2MB
+alfresco/alfresco-transform-core-aio            3.0.0     696189c329f0   8 minutes ago        4.93GB
 ```
 
 Once the Docker Images are available in your local registry, existing Docker Compose templates can be run using ARM64 architecture.
 
-Enterprise Docker Images can be also built, but [Alfresco Nexus](https://nexus.alfresco.com) credentials are required. 
+Enterprise Docker Images can be also built, but [Alfresco Nexus](https://nexus.alfresco.com) credentials are required. Populate `NEXUS_USER`and `NEXUS_PASS` properties in `buildx.sh` file.
 
 ```
 $ ./buildx.sh repo-ent 7.3.0 share-ent 7.3.0 search-ent 2.0.3
