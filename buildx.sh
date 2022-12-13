@@ -17,6 +17,9 @@ do
     }
 done
 
+# Home Folder
+HOME_FOLDER=$PWD
+
 # Configuration
 REPOSITORY=alfresco
 NEXUS_USER=
@@ -56,7 +59,7 @@ function build {
     cp alfresco-share-base-distribution-*/amps/* target/amps
     sed -i '' 's/alfresco-base-tomcat:tomcat9-jre11-centos7.*/alfresco-base-tomcat:tomcat9-jre11-centos7-202209261711/g' Dockerfile
     docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-content-repository-community:$REPO_COM_VERSION
-    cd ../../..
+    cd $HOME_FOLDER
   fi
 
   # Repository Enterprise
@@ -67,7 +70,7 @@ function build {
     --build-arg NEXUS_USER=$NEXUS_USER \
     --build-arg NEXUS_PASS=$NEXUS_PASS \
     -t quay.io/$REPOSITORY/alfresco-content-repository:$REPO_ENT_VERSION
-    cd ..
+    cd $HOME_FOLDER
   fi
 
   # Share
@@ -82,7 +85,7 @@ function build {
     
     cd share
     docker buildx build . --load --platform linux/arm64 --build-arg SHARE_INTERNAL_VERSION=$SHARE_COM_VERSION -t $REPOSITORY/alfresco-share:$SHARE_VERSION
-    cd ..
+    cd $HOME_FOLDER
   fi
 
   # Share Enterprise
@@ -97,7 +100,7 @@ function build {
     
     cd share
     docker buildx build . --load --platform linux/arm64 --build-arg SHARE_INTERNAL_VERSION=$SHARE_ENT_VERSION -t quay.io/$REPOSITORY/alfresco-share:$SHARE_VERSION
-    cd ..
+    cd $HOME_FOLDER
   fi  
 
   # Search Services 
@@ -111,7 +114,7 @@ function build {
     sed -i '' 's/download.yourkit.com/archive.yourkit.com/g' Dockerfile
     sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk17-rockylinux8/g' Dockerfile
     docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-search-services:$SEARCH_VERSION
-    cd ../../../../..
+    cd $HOME_FOLDER
   fi
 
   # Search Services Enterprise (TBD)
@@ -125,14 +128,14 @@ function build {
     sed -i '' 's/download.yourkit.com/archive.yourkit.com/g' Dockerfile
     sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk17-rockylinux8/g' Dockerfile
     docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-search-services:$SEARCH_ENT_VERSION
-    cd ../../../../..
+    cd $HOME_FOLDER
   fi
 
   # Transform Service (TBD)
   if [ "$TRANSFORM" == "true" ]; then
     cd transform
     docker buildx build . --load --platform linux/arm64 --build-arg TRANSFORM_VERSION=$TRANSFORM_VERSION -t $REPOSITORY/alfresco-transform-core-aio:$TRANSFORM_VERSION
-    cd ..
+    cd $HOME_FOLDER
   fi
 
   # ACA
@@ -144,7 +147,7 @@ function build {
     npm install
     npm run build
     docker buildx build . --load --platform linux/arm64 --build-arg PROJECT_NAME=content-ce -t $REPOSITORY/alfresco-content-app:$ACA_VERSION
-    cd ..
+    cd $HOME_FOLDER
   fi
 
   # Proxy
@@ -154,7 +157,7 @@ function build {
     cd acs-ingress
     git checkout $PROXY_VERSION
     docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-acs-nginx:$PROXY_VERSION
-    cd ..
+    cd $HOME_FOLDER
   fi
 
   # List Docker Images built (or existing)
