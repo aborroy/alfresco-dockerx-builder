@@ -99,35 +99,31 @@ function build {
     cd ..
     
     cd share
-    docker buildx build . --load --platform linux/arm64 --build-arg SHARE_INTERNAL_VERSION=$SHARE_ENT_VERSION -t quay.io/$REPOSITORY/alfresco-share:$SHARE_VERSION
+    docker buildx build . --load --platform linux/arm64 \
+    --build-arg SHARE_INTERNAL_VERSION=$SHARE_ENT_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-share:$SHARE_VERSION
     cd $HOME_FOLDER
   fi  
 
   # Search Services 
   if [ "$SEARCH" == "true" ]; then
-    rm -rf SearchServices
-    git clone git@github.com:Alfresco/SearchServices.git
-    cd SearchServices/search-services
-    git checkout $SEARCH_VERSION
-    mvn clean install -DskipTests
-    cd packaging/target/docker-resources
-    sed -i '' 's/download.yourkit.com/archive.yourkit.com/g' Dockerfile
-    sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk17-rockylinux8/g' Dockerfile
-    docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-search-services:$SEARCH_VERSION
+    cd search
+    docker buildx build . --load --platform linux/arm64 \
+    --build-arg SEARCH_VERSION=$SEARCH_VERSION \
+    --build-arg DIST_DIR=/opt/alfresco-search-services \
+    -t $REPOSITORY/alfresco-search-services:$SEARCH_VERSION    
     cd $HOME_FOLDER
   fi
 
   # Search Services Enterprise (TBD)
   if [ "$SEARCH_ENT" == "true" ]; then
-    rm -rf InsightEngine
-    git clone git@github.com:Alfresco/InsightEngine.git
-    cd InsightEngine/search-services
-    git checkout $SEARCH_ENT_VERSION
-    mvn clean install -DskipTests
-    cd packaging/target/docker-resources
-    sed -i '' 's/download.yourkit.com/archive.yourkit.com/g' Dockerfile
-    sed -i '' 's/FROM alfresco.*/FROM alfresco\/alfresco-base-java:jdk17-rockylinux8/g' Dockerfile
-    docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-search-services:$SEARCH_ENT_VERSION
+    cd search
+    docker buildx build . --load --platform linux/arm64 \
+    --build-arg SEARCH_VERSION=$SEARCH_ENT_VERSION \
+    --build-arg NEXUS_USER=$NEXUS_USER \
+    --build-arg NEXUS_PASS=$NEXUS_PASS \
+    --build-arg DIST_DIR=/opt/alfresco-insight-engine \
+    -t quay.io/$REPOSITORY/alfresco-insight-engine:$SEARCH_ENT_VERSION
     cd $HOME_FOLDER
   fi
 
