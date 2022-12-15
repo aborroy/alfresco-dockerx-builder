@@ -31,7 +31,10 @@ RUN sed -i "s/shared.loader=/shared.loader=\${catalina.base}\/shared\/classes/" 
 # Increase resource caching size
 RUN sed -i "s|<Context>|<Context>\n<Resources cacheMaxSize=\"51200\"/> |g" /usr/local/tomcat/conf/context.xml
 
-COPY substituter.sh /usr/local/tomcat/shared/classes/alfresco
+RUN curl https://raw.githubusercontent.com/Alfresco/alfresco-community-share/$SHARE_INTERNAL_VERSION/packaging/docker/substituter.sh \
+    -o /usr/local/tomcat/shared/classes/alfresco/substituter.sh
+RUN curl https://raw.githubusercontent.com/Alfresco/alfresco-community-share/$SHARE_INTERNAL_VERSION/packaging/docker/src/main/resources/web-extension-samples/share-config-custom.xml \
+    -o /usr/local/tomcat/shared/classes/alfresco/web-extension/share-config-custom.xml
 RUN chmod +x /usr/local/tomcat/shared/classes/alfresco/substituter.sh
 
 # apply amps

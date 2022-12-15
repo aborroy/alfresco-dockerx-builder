@@ -84,7 +84,9 @@ function build {
     cd ..
     
     cd share
-    docker buildx build . --load --platform linux/arm64 --build-arg SHARE_INTERNAL_VERSION=$SHARE_COM_VERSION -t $REPOSITORY/alfresco-share:$SHARE_VERSION
+    docker buildx build . --load --platform linux/arm64 \
+    --build-arg SHARE_INTERNAL_VERSION=$SHARE_COM_VERSION \
+    -t $REPOSITORY/alfresco-share:$SHARE_VERSION
     cd $HOME_FOLDER
   fi
 
