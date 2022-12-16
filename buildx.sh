@@ -34,6 +34,7 @@ SEARCH="false"
 SEARCH_ENT="false"
 TRANSFORM="false"
 TRANSFORM_ROUTER="false"
+SHARED_FILE_STORE="false"
 ACA="false"
 PROXY="false"
 PROXY_ENT="false"
@@ -150,7 +151,7 @@ function build {
 
   fi
 
-  # Transform Service
+  # Transform Router
   if [ "$TRANSFORM_ROUTER" == "true" ]; then
 
     cd transform-router
@@ -161,7 +162,20 @@ function build {
     -t quay.io/$REPOSITORY/alfresco-transform-router:$TRANSFORM_ROUTER_VERSION
     cd $HOME_FOLDER
 
-  fi  
+  fi
+
+  # Shared File Store
+  if [ "$SHARED_FILE_STORE" == "true" ]; then
+
+    cd shared-file-store
+    docker buildx build . --load --platform linux/arm64 \
+    --build-arg SHARED_FILE_STORE_VERSION=$SHARED_FILE_STORE_VERSION \
+    --build-arg NEXUS_USER=$NEXUS_USER \
+    --build-arg NEXUS_PASS=$NEXUS_PASS \
+    -t quay.io/$REPOSITORY/alfresco-shared-file-store:$SHARED_FILE_STORE_VERSION
+    cd $HOME_FOLDER
+
+  fi    
 
   # ACA
   if [ "$ACA" == true ]; then
@@ -227,6 +241,12 @@ do
             TRANSFORM_ROUTER_VERSION=$1
             shift
         ;;
+        shared-file-store-ent)
+            SHARED_FILE_STORE="true"
+            shift
+            SHARED_FILE_STORE_VERSION=$1
+            shift
+        ;;
         share)
             SHARE="true"
             shift
@@ -281,6 +301,7 @@ do
             echo "  aca VERSION"
             echo "  transform VERSION"
             echo "  transform-router-ent VERSION"
+            echo "  shared-file-store-ent VERSION"
             echo "  proxy VERSION"
             exit 1
         ;;
