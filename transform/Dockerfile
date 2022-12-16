@@ -10,6 +10,12 @@ FROM alfresco/alfresco-base-java:jdk17-rockylinux8
 ARG TRANSFORM_VERSION
 ENV TRANSFORM_VERSION $TRANSFORM_VERSION
 
+ARG IMAGEMAGICK_HOME_FOLDER
+ENV IMAGEMAGICK_HOME_FOLDER $IMAGEMAGICK_HOME_FOLDER
+
+ARG LIBREOFFICE_HOME_FOLDER
+ENV LIBREOFFICE_HOME_FOLDER $LIBREOFFICE_HOME_FOLDER
+
 ARG EXIFTOOL_VERSION=12.25
 ARG EXIFTOOL_FOLDER=Image-ExifTool-${EXIFTOOL_VERSION}
 ARG EXIFTOOL_URL=https://nexus.alfresco.com/nexus/service/local/repositories/thirdparty/content/org/exiftool/image-exiftool/${EXIFTOOL_VERSION}/image-exiftool-${EXIFTOOL_VERSION}.tgz
@@ -29,8 +35,8 @@ RUN yum -y install --skip-broken libreoffice-*
 RUN dnf install epel-release -y && dnf config-manager --set-enabled powertools && \
     dnf install -y ImageMagick ImageMagick-devel && dnf -y install perl-Image-ExifTool
 
-RUN ln -s /usr/lib64/ImageMagick-7.0.10 /usr/lib64/ImageMagick-6.9.12
-RUN ln -s /usr/lib64/libreoffice /opt/libreoffice7.2
+RUN ln -s /usr/lib64/ImageMagick-7.0.10 ${IMAGEMAGICK_HOME_FOLDER}
+RUN ln -s /usr/lib64/libreoffice ${LIBREOFFICE_HOME_FOLDER}
 
 # Replacement for alfresco-pdf-renderer by using ImageMagick
 # Only covering the simple call (generate PNG for page 0 of the PDF): 

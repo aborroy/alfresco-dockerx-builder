@@ -59,7 +59,8 @@ function build {
     && unzip alfresco-share-base-distribution-*.zip
     cp alfresco-share-base-distribution-*/amps/* target/amps
     sed -i '' 's/alfresco-base-tomcat:tomcat9-jre11-centos7.*/alfresco-base-tomcat:tomcat9-jre11-centos7-202209261711/g' Dockerfile
-    docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-content-repository-community:$REPO_COM_VERSION
+    docker buildx build . --load --platform linux/arm64 \
+    -t $REPOSITORY/alfresco-content-repository-community:$REPO_COM_VERSION
     cd $HOME_FOLDER
   fi
 
@@ -118,7 +119,7 @@ function build {
     cd $HOME_FOLDER
   fi
 
-  # Search Services Enterprise (TBD)
+  # Search Services Enterprise
   if [ "$SEARCH_ENT" == "true" ]; then
     cd search
     docker buildx build . --load --platform linux/arm64 \
@@ -130,11 +131,22 @@ function build {
     cd $HOME_FOLDER
   fi
 
-  # Transform Service (TBD)
+  # Transform Service
   if [ "$TRANSFORM" == "true" ]; then
+
+    wget https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$TRANSFORM_VERSION/alfresco-transform-core-aio/alfresco-transform-core-aio-boot/src/main/resources/application-default.yaml
+    IMAGEMAGICK_HOME_FOLDER=$(ggrep -oP '(?<=path: \$\{LIBREOFFICE_HOME:).*?(?=\})' application-default.yaml)
+    LIBREOFFICE_HOME_FOLDER=$(ggrep -oP '(?<=root: \$\{IMAGEMAGICK_ROOT:).*?(?=\})' application-default.yaml)
+    rm application-default.yaml
+
     cd transform
-    docker buildx build . --load --platform linux/arm64 --build-arg TRANSFORM_VERSION=$TRANSFORM_VERSION -t $REPOSITORY/alfresco-transform-core-aio:$TRANSFORM_VERSION
+    docker buildx build . --load --platform linux/arm64 \
+    --build-arg TRANSFORM_VERSION=$TRANSFORM_VERSION \
+    --build-arg IMAGEMAGICK_HOME_FOLDER=$IMAGEMAGICK_HOME_FOLDER \
+    --build-arg LIBREOFFICE_HOME_FOLDER=$LIBREOFFICE_HOME_FOLDER \
+    -t $REPOSITORY/alfresco-transform-core-aio:$TRANSFORM_VERSION
     cd $HOME_FOLDER
+
   fi
 
   # ACA
@@ -145,7 +157,9 @@ function build {
     git checkout $ACA_VERSION
     npm install
     npm run build
-    docker buildx build . --load --platform linux/arm64 --build-arg PROJECT_NAME=content-ce -t $REPOSITORY/alfresco-content-app:$ACA_VERSION
+    docker buildx build . --load --platform linux/arm64 \
+    --build-arg PROJECT_NAME=content-ce \
+    -t $REPOSITORY/alfresco-content-app:$ACA_VERSION
     cd $HOME_FOLDER
   fi
 
@@ -159,7 +173,8 @@ function build {
     if [ "$PROXY_ENT" == "true" ]; then
       PREFIX="quay.io/"
     fi
-    docker buildx build . --load --platform linux/arm64 -t $PREFIX$REPOSITORY/alfresco-acs-nginx:$PROXY_VERSION
+    docker buildx build . --load --platform linux/arm64 \
+    -t $PREFIX$REPOSITORY/alfresco-acs-nginx:$PROXY_VERSION
     cd $HOME_FOLDER
   fi
 
