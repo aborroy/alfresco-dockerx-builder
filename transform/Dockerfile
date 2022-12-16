@@ -45,10 +45,15 @@ RUN ln -s /usr/lib64/libreoffice /opt/libreoffice7.2
 RUN echo 'convert -thumbnail x100 -background white -alpha remove $1[0] $2' >> /usr/bin/alfresco-pdf-renderer && \
     chmod +x /usr/bin/alfresco-pdf-renderer
 
-RUN wget https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-transform-core-aio/$TRANSFORM_VERSION/alfresco-transform-core-aio-$TRANSFORM_VERSION.jar && \
-    cp alfresco-transform-core-aio-$TRANSFORM_VERSION.jar /usr/bin
-
-RUN ln /usr/bin/alfresco-transform-core-aio-$TRANSFORM_VERSION.jar /usr/bin/alfresco-transform-core-aio.jar
+RUN if [[ $TRANSFORM_VERSION = 3* ]]; then \
+      wget https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-transform-core-aio/$TRANSFORM_VERSION/alfresco-transform-core-aio-$TRANSFORM_VERSION.jar && \
+      cp alfresco-transform-core-aio-$TRANSFORM_VERSION.jar /usr/bin && \
+      ln /usr/bin/alfresco-transform-core-aio-$TRANSFORM_VERSION.jar /usr/bin/alfresco-transform-core-aio.jar; \
+    else \
+      wget https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-transform-core-aio-boot/$TRANSFORM_VERSION/alfresco-transform-core-aio-boot-$TRANSFORM_VERSION.jar && \
+      cp alfresco-transform-core-aio-boot-$TRANSFORM_VERSION.jar /usr/bin && \
+      ln /usr/bin/alfresco-transform-core-aio-boot-$TRANSFORM_VERSION.jar /usr/bin/alfresco-transform-core-aio.jar; \
+    fi
 
 EXPOSE 8090
 

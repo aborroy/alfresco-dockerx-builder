@@ -35,6 +35,7 @@ SEARCH_ENT="false"
 TRANSFORM="false"
 ACA="false"
 PROXY="false"
+PROXY_ENT="false"
 
 function build {
 
@@ -149,12 +150,16 @@ function build {
   fi
 
   # Proxy
-  if [ "$PROXY" == "true" ]; then
+  if [ "$PROXY" == "true" ] || [ "$PROXY_ENT" == "true" ]; then
     rm -rf acs-ingress
     git clone git@github.com:Alfresco/acs-ingress.git
     cd acs-ingress
     git checkout $PROXY_VERSION
-    docker buildx build . --load --platform linux/arm64 -t $REPOSITORY/alfresco-acs-nginx:$PROXY_VERSION
+    PREFIX=""
+    if [ "$PROXY_ENT" == "true" ]; then
+      PREFIX="quay.io/"
+    fi
+    docker buildx build . --load --platform linux/arm64 -t $PREFIX$REPOSITORY/alfresco-acs-nginx:$PROXY_VERSION
     cd $HOME_FOLDER
   fi
 
@@ -229,6 +234,12 @@ do
             PROXY_VERSION=$1
             shift
         ;;        
+        proxy-ent)
+            PROXY_ENT="true"
+            shift
+            PROXY_VERSION=$1
+            shift
+        ;;
         *)
             echo "An invalid parameter was received: $1"
             echo "Allowed parameters:"
