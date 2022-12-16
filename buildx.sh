@@ -33,6 +33,7 @@ SHARE_ENT="false"
 SEARCH="false"
 SEARCH_ENT="false"
 TRANSFORM="false"
+TRANSFORM_ROUTER="false"
 ACA="false"
 PROXY="false"
 PROXY_ENT="false"
@@ -149,6 +150,19 @@ function build {
 
   fi
 
+  # Transform Service
+  if [ "$TRANSFORM_ROUTER" == "true" ]; then
+
+    cd transform-router
+    docker buildx build . --load --platform linux/arm64 \
+    --build-arg TRANSFORM_ROUTER_VERSION=$TRANSFORM_ROUTER_VERSION \
+    --build-arg NEXUS_USER=$NEXUS_USER \
+    --build-arg NEXUS_PASS=$NEXUS_PASS \
+    -t quay.io/$REPOSITORY/alfresco-transform-router:$TRANSFORM_ROUTER_VERSION
+    cd $HOME_FOLDER
+
+  fi  
+
   # ACA
   if [ "$ACA" == true ]; then
     rm -rf alfresco-content-app
@@ -207,6 +221,12 @@ do
             TRANSFORM_VERSION=$1
             shift
         ;;
+        transform-router-ent)
+            TRANSFORM_ROUTER="true"
+            shift
+            TRANSFORM_ROUTER_VERSION=$1
+            shift
+        ;;
         share)
             SHARE="true"
             shift
@@ -237,12 +257,6 @@ do
             ACA_VERSION=$1
             shift
         ;;
-        transform)
-            TRANSFORM="true"
-            shift
-            TRANSFORM_VERSION=$1
-            shift
-        ;;
         proxy)
             PROXY="true"
             shift
@@ -266,6 +280,7 @@ do
             echo "  search-ent VERSION"
             echo "  aca VERSION"
             echo "  transform VERSION"
+            echo "  transform-router-ent VERSION"
             echo "  proxy VERSION"
             exit 1
         ;;
