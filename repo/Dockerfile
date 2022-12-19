@@ -3,6 +3,12 @@ FROM alfresco/alfresco-base-tomcat:tomcat9-jre17-rockylinux8-202209261711
 # Set default environment args
 ARG TOMCAT_DIR=/usr/local/tomcat
 
+# Set default user information
+ARG GROUPNAME=Alfresco
+ARG GROUPID=1000
+ARG IMAGEUSERNAME=alfresco
+ARG USERID=33000
+
 # Alfresco Repository Version
 ARG ALFRESCO_VERSION
 ENV ALFRESCO_VERSION $ALFRESCO_VERSION
@@ -47,6 +53,10 @@ RUN cp -r target/web-server/webapps/alfresco.war ${TOMCAT_DIR}/webapps && \
 # shared.loader=${catalina.base}/shared/classes
 RUN sed -i "s/shared.loader=/shared.loader=\${catalina.base}\/shared\/classes/" ${TOMCAT_DIR}/conf/catalina.properties
 
+# Install api-explorer
+RUN curl https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/api-explorer/$ALFRESCO_VERSION/api-explorer-$ALFRESCO_VERSION.war \
+    -o api-explorer.war && mv api-explorer.war ${TOMCAT_DIR}/webapps/
+
 RUN mkdir -p ${TOMCAT_DIR}/amps
 
 # Copy the amps from build context to the appropriate location for your application server
@@ -77,3 +87,31 @@ RUN yum install -y fontconfig-2.13.1-4.el8 \
                    libpng-1.6.34-5.el8 \
                    dejavu-sans-fonts-2.35-7.el8 && \
     yum clean all
+
+# The standard configuration is to have all Tomcat files owned by root with group GROUPNAME and whilst owner has read/write privileges,
+# group only has restricted permissions and world has no permissions.
+RUN mkdir -p ${TOMCAT_DIR}/conf/Catalina/localhost && \
+    mkdir -p ${TOMCAT_DIR}/alf_data && \
+    groupadd -g ${GROUPID} ${GROUPNAME} && \
+    useradd -u ${USERID} -G ${GROUPNAME} ${IMAGEUSERNAME} && \
+    chgrp -R ${GROUPNAME} ${TOMCAT_DIR} && \
+    chmod g+rx ${TOMCAT_DIR}/conf && \
+    chmod -R g+r ${TOMCAT_DIR}/conf && \
+    find ${TOMCAT_DIR}/webapps -type d -exec chmod 0750 {} \; && \
+    find ${TOMCAT_DIR}/webapps -type f -exec chmod 0640 {} \; && \
+    chmod -R g+r ${TOMCAT_DIR}/webapps && \
+    chmod g+r ${TOMCAT_DIR}/conf/Catalina && \
+    chmod g+rwx ${TOMCAT_DIR}/alf_data && \
+    chmod g+rwx ${TOMCAT_DIR}/logs && \
+    chmod o-w ${TOMCAT_DIR}/logs && \
+    chmod g+rwx ${TOMCAT_DIR}/temp && \
+    chmod g+rwx ${TOMCAT_DIR}/work && \
+    chmod o-w ${TOMCAT_DIR}/work && \
+    chmod 664 ${TOMCAT_DIR}/alfresco-mmt/alfresco-mmt*.jar && \
+    find /licenses -type d -exec chmod 0755 {} \; && \
+    find /licenses -type f -exec chmod 0644 {} \;
+
+# For remote debug
+EXPOSE 8000
+
+USER ${IMAGEUSERNAME}    
