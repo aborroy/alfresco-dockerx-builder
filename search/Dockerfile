@@ -1,4 +1,4 @@
-FROM alfresco/alfresco-base-java:jre17-rockylinux8-202209261621
+FROM alfresco/alfresco-base-java:jre11-rockylinux8-202209261621
 
 ARG DIST_DIR
 ENV DIST_DIR $DIST_DIR
