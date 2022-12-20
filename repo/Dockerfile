@@ -53,8 +53,9 @@ RUN cp -r target/web-server/webapps/alfresco.war ${TOMCAT_DIR}/webapps && \
 # shared.loader=${catalina.base}/shared/classes
 RUN sed -i "s/shared.loader=/shared.loader=\${catalina.base}\/shared\/classes/" ${TOMCAT_DIR}/conf/catalina.properties
 
-# Install api-explorer
-RUN curl https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/api-explorer/$ALFRESCO_VERSION/api-explorer-$ALFRESCO_VERSION.war \
+# Install api-explorer (cut to three elements version number)
+RUN API_EXPLORER_VERSION=$(echo "$ALFRESCO_VERSION" | cut -c1-5) && \
+    curl https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/api-explorer/$API_EXPLORER_VERSION/api-explorer-$API_EXPLORER_VERSION.war \
     -o api-explorer.war && mv api-explorer.war ${TOMCAT_DIR}/webapps/
 
 RUN mkdir -p ${TOMCAT_DIR}/amps
@@ -72,7 +73,8 @@ RUN sed -i -e "s_appender.rolling.fileName\=alfresco.log_appender.rolling.fileNa
         ${TOMCAT_DIR}/webapps/alfresco/WEB-INF/classes/log4j.properties && \
     sed -i -e "s_appender.rolling.filePattern=alfresco.log.%d{yyyy-MM-dd}_appender.rolling.filePattern\=${TOMCAT_DIR}/logs\/alfresco.log.%d{yyyy-MM-dd}_" \
         ${TOMCAT_DIR}/webapps/alfresco/WEB-INF/classes/log4j.properties && \
-
+    sed -i -e "s_log4j.appender.File.File\=alfresco.log_log4j.appender.File.File\=${TOMCAT_DIR}/logs\/alfresco.log_" \
+        ${TOMCAT_DIR}/webapps/alfresco/WEB-INF/classes/log4j.properties && \
 # Add catalina.policy to ROOT.war and alfresco.war
 # Grant all security permissions to alfresco webapp because of numerous permissions required in order to work properly.
 # Grant only deployXmlPermission to ROOT webapp.
@@ -108,6 +110,7 @@ RUN mkdir -p ${TOMCAT_DIR}/conf/Catalina/localhost && \
     chmod g+rwx ${TOMCAT_DIR}/work && \
     chmod o-w ${TOMCAT_DIR}/work && \
     chmod 664 ${TOMCAT_DIR}/alfresco-mmt/alfresco-mmt*.jar && \
+    chown -R ${USERID} ${TOMCAT_DIR}/* && \
     find /licenses -type d -exec chmod 0755 {} \; && \
     find /licenses -type f -exec chmod 0644 {} \;
 
