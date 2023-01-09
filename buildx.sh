@@ -47,14 +47,14 @@ function build {
     rm -rf acs-community-packaging
     git clone git@github.com:Alfresco/acs-community-packaging.git
     cd acs-community-packaging
-    git checkout $REPO_COM_VERSION
+    git checkout $REPO_COM_VERSION || { echo -e >&2 "Available tags:\n$(git tag -l "${REPO_COM_VERSION:0:5}*")"; exit 1; }
     REPO_VERSION=$(ggrep -oP '(?<=<dependency.alfresco-community-repo.version>).*?(?=</dependency.alfresco-community-repo.version>)' pom.xml)
     SHARE_INTERNAL_VERSION=$(ggrep -oP '(?<=<dependency.alfresco-community-share.version>).*?(?=</dependency.alfresco-community-share.version>)' pom.xml)
 
     rm -rf alfresco-community-repo
     git clone git@github.com:Alfresco/alfresco-community-repo.git
     cd alfresco-community-repo
-    git checkout $REPO_VERSION
+    git checkout $REPO_VERSION || { echo -e >&2 "Available tags:\n$(git tag -l "${REPO_VERSION:0:5}*")"; exit 1; }
     mvn clean install -DskipTests
     cd packaging/docker-alfresco
     wget https://nexus.alfresco.com/nexus/service/local/repo_groups/public/content/org/alfresco/alfresco-share-base-distribution/$SHARE_INTERNAL_VERSION/alfresco-share-base-distribution-$SHARE_INTERNAL_VERSION.zip \
@@ -83,7 +83,7 @@ function build {
     rm -rf acs-community-packaging
     git clone git@github.com:Alfresco/acs-community-packaging.git
     cd acs-community-packaging
-    git checkout $SHARE_VERSION
+    git checkout $SHARE_VERSION || { echo -e >&2 "Available tags:\n$(git tag -l "${SHARE_VERSION:0:5}*")"; exit 1; }
     SHARE_COM_VERSION=$(ggrep -oP '(?<=<dependency.alfresco-community-share.version>).*?(?=</dependency.alfresco-community-share.version>)' pom.xml)
     cd ..
     
@@ -100,7 +100,7 @@ function build {
     rm -rf acs-packaging
     git clone git@github.com:Alfresco/acs-packaging.git
     cd acs-packaging
-    git checkout $SHARE_VERSION
+    git checkout $SHARE_VERSION || { echo -e >&2 "Available tags:\n$(git tag -l "${SHARE_VERSION:0:5}*")"; exit 1; }
     SHARE_ENT_VERSION=$(ggrep -oP '(?<=<dependency.alfresco-enterprise-share.version>).*?(?=</dependency.alfresco-enterprise-share.version>)' pom.xml)
     cd ..
     
@@ -182,7 +182,7 @@ function build {
     rm -rf alfresco-content-app
     git clone git@github.com:Alfresco/alfresco-content-app.git
     cd alfresco-content-app
-    git checkout $ACA_VERSION
+    git checkout $ACA_VERSION || { echo -e >&2 "Available tags:\n$(git tag -l "${ACA_VERSION:0:5}*")"; exit 1; }
     npm install
     npm run build
     docker buildx build . --load --platform linux/arm64 \
