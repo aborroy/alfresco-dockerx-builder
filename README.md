@@ -2,7 +2,7 @@
 
 This project provides a sample script to build Alfresco Docker Images for **Apple Silicon**. This tool is oriented for Alfresco Developers that use Docker Images in their development workflow.
 
-Alfresco doesn't provide ARM64 Docker Images and this configuration is not *officially* supported by Alfresco.
+Alfresco doesn't provide ARM64 Docker Images *YET* and this configuration is not *officially* supported by Alfresco.
 
 >> Additional recommendations provided by [howkymike](https://howkymike.github.io/) in
 >> https://gist.github.com/howkymike/d2ad4e81298e2408511a14cb731441c3
