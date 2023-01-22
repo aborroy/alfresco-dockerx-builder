@@ -24,6 +24,7 @@ HOME_FOLDER=$PWD
 REPOSITORY=alfresco
 NEXUS_USER=
 NEXUS_PASS=
+PLATFORM=linux/arm64
 
 # Docker Images building flags
 REPO="false"
@@ -38,6 +39,7 @@ SHARED_FILE_STORE="false"
 ACA="false"
 PROXY="false"
 PROXY_ENT="false"
+IDENTITY="false"
 
 function build {
 
@@ -61,7 +63,7 @@ function build {
     && unzip alfresco-share-base-distribution-*.zip
     cp alfresco-share-base-distribution-*/amps/* target/amps
     sed -i '' 's/alfresco-base-tomcat:tomcat9-jre11-centos7.*/alfresco-base-tomcat:tomcat9-jre11-centos7-202209261711/g' Dockerfile
-    docker buildx build . --load --platform linux/arm64 \
+    docker buildx build . --load --platform $PLATFORM \
     -t $REPOSITORY/alfresco-content-repository-community:$REPO_COM_VERSION
     cd $HOME_FOLDER
   fi
@@ -69,7 +71,7 @@ function build {
   # Repository Enterprise
   if [ "$REPO_ENT" == "true" ]; then
     cd repo
-    docker buildx build . --load --platform linux/arm64 \
+    docker buildx build . --load --platform $PLATFORM \
     --build-arg ALFRESCO_VERSION=$REPO_ENT_VERSION \
     --build-arg NEXUS_USER=$NEXUS_USER \
     --build-arg NEXUS_PASS=$NEXUS_PASS \
@@ -88,7 +90,7 @@ function build {
     cd ..
     
     cd share
-    docker buildx build . --load --platform linux/arm64 \
+    docker buildx build . --load --platform $PLATFORM \
     --build-arg SHARE_INTERNAL_VERSION=$SHARE_COM_VERSION \
     -t $REPOSITORY/alfresco-share:$SHARE_VERSION
     cd $HOME_FOLDER
@@ -105,7 +107,7 @@ function build {
     cd ..
     
     cd share
-    docker buildx build . --load --platform linux/arm64 \
+    docker buildx build . --load --platform $PLATFORM \
     --build-arg SHARE_INTERNAL_VERSION=$SHARE_ENT_VERSION \
     -t quay.io/$REPOSITORY/alfresco-share:$SHARE_VERSION
     cd $HOME_FOLDER
@@ -114,7 +116,7 @@ function build {
   # Search Services 
   if [ "$SEARCH" == "true" ]; then
     cd search
-    docker buildx build . --load --platform linux/arm64 \
+    docker buildx build . --load --platform $PLATFORM \
     --build-arg SEARCH_VERSION=$SEARCH_VERSION \
     --build-arg DIST_DIR=/opt/alfresco-search-services \
     -t $REPOSITORY/alfresco-search-services:$SEARCH_VERSION    
@@ -124,7 +126,7 @@ function build {
   # Search Services Enterprise
   if [ "$SEARCH_ENT" == "true" ]; then
     cd search
-    docker buildx build . --load --platform linux/arm64 \
+    docker buildx build . --load --platform $PLATFORM \
     --build-arg SEARCH_VERSION=$SEARCH_ENT_VERSION \
     --build-arg NEXUS_USER=$NEXUS_USER \
     --build-arg NEXUS_PASS=$NEXUS_PASS \
@@ -142,7 +144,7 @@ function build {
     rm application-default.yaml
 
     cd transform
-    docker buildx build . --load --platform linux/arm64 \
+    docker buildx build . --load --platform $PLATFORM \
     --build-arg TRANSFORM_VERSION=$TRANSFORM_VERSION \
     --build-arg IMAGEMAGICK_HOME_FOLDER=$IMAGEMAGICK_HOME_FOLDER \
     --build-arg LIBREOFFICE_HOME_FOLDER=$LIBREOFFICE_HOME_FOLDER \
@@ -155,7 +157,7 @@ function build {
   if [ "$TRANSFORM_ROUTER" == "true" ]; then
 
     cd transform-router
-    docker buildx build . --load --platform linux/arm64 \
+    docker buildx build . --load --platform $PLATFORM \
     --build-arg TRANSFORM_ROUTER_VERSION=$TRANSFORM_ROUTER_VERSION \
     --build-arg NEXUS_USER=$NEXUS_USER \
     --build-arg NEXUS_PASS=$NEXUS_PASS \
@@ -168,7 +170,7 @@ function build {
   if [ "$SHARED_FILE_STORE" == "true" ]; then
 
     cd shared-file-store
-    docker buildx build . --load --platform linux/arm64 \
+    docker buildx build . --load --platform $PLATFORM \
     --build-arg SHARED_FILE_STORE_VERSION=$SHARED_FILE_STORE_VERSION \
     --build-arg NEXUS_USER=$NEXUS_USER \
     --build-arg NEXUS_PASS=$NEXUS_PASS \
@@ -185,7 +187,7 @@ function build {
     git checkout $ACA_VERSION || { echo -e >&2 "Available tags:\n$(git tag -l "${ACA_VERSION:0:5}*")"; exit 1; }
     npm install
     npm run build
-    docker buildx build . --load --platform linux/arm64 \
+    docker buildx build . --load --platform $PLATFORM \
     --build-arg PROJECT_NAME=content-ce \
     -t $REPOSITORY/alfresco-content-app:$ACA_VERSION
     cd $HOME_FOLDER
@@ -201,10 +203,21 @@ function build {
     if [ "$PROXY_ENT" == "true" ]; then
       PREFIX="quay.io/"
     fi
-    docker buildx build . --load --platform linux/arm64 \
+    docker buildx build . --load --platform $PLATFORM \
     -t $PREFIX$REPOSITORY/alfresco-acs-nginx:$PROXY_VERSION
     cd $HOME_FOLDER
   fi
+
+  # Identity
+  if [ "$IDENTITY" == "true" ]; then
+
+    cd identity
+    docker buildx build . --load --platform $PLATFORM \
+    --build-arg IDENTITY_VERSION=$IDENTITY_VERSION \
+    -t $REPOSITORY/alfresco-identity-service:$IDENTITY_VERSION
+    cd $HOME_FOLDER
+
+  fi    
 
   # List Docker Images built (or existing)
   docker images "alfresco/*"
@@ -289,6 +302,12 @@ do
             PROXY_VERSION=$1
             shift
         ;;
+        identity)
+            IDENTITY="true"
+            shift
+            IDENTITY_VERSION=$1
+            shift
+        ;;
         *)
             echo "An invalid parameter was received: $1"
             echo "Allowed parameters:"
@@ -303,6 +322,7 @@ do
             echo "  transform-router-ent VERSION"
             echo "  shared-file-store-ent VERSION"
             echo "  proxy VERSION"
+            echo "  identity VERSION"
             exit 1
         ;;
     esac
