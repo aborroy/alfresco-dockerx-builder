@@ -73,8 +73,6 @@ function build {
     cd repo
     docker buildx build . --load --platform $PLATFORM \
     --build-arg ALFRESCO_VERSION=$REPO_ENT_VERSION \
-    --build-arg NEXUS_USER=$NEXUS_USER \
-    --build-arg NEXUS_PASS=$NEXUS_PASS \
     -t quay.io/$REPOSITORY/alfresco-content-repository:$REPO_ENT_VERSION
     cd $HOME_FOLDER
   fi
