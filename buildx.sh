@@ -29,8 +29,12 @@ PLATFORM=linux/arm64
 # Docker Images building flags
 REPO="false"
 REPO_ENT="false"
+AGS="false"
+AGS_ENT="false"
 SHARE="false"
 SHARE_ENT="false"
+AGS_SHARE="false"
+AGS_SHARE_ENT="false"
 SEARCH="false"
 SEARCH_ENT="false"
 TRANSFORM="false"
@@ -77,6 +81,24 @@ function build {
     cd $HOME_FOLDER
   fi
 
+  # AGS Community Repo
+  if [ "$AGS" == "true" ]; then
+    cd ags
+    docker buildx build . --load --platform $PLATFORM \
+    --build-arg AGS_VERSION=$AGS_VERSION \
+    -t $REPOSITORY/alfresco-governance-repository-community:$AGS_VERSION
+    cd $HOME_FOLDER
+  fi
+
+  # AGS Enterprise Repo
+  if [ "$AGS_ENT" == "true" ]; then
+    cd ags-ent
+    docker buildx build . --load --platform $PLATFORM \
+    --build-arg AGS_ENT_VERSION=$AGS_ENT_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-governance-repository-enterprise:$AGS_ENT_VERSION
+    cd $HOME_FOLDER
+  fi
+
   # Share
   if [ "$SHARE" == "true" ]; then
 
@@ -109,7 +131,25 @@ function build {
     --build-arg SHARE_INTERNAL_VERSION=$SHARE_ENT_VERSION \
     -t quay.io/$REPOSITORY/alfresco-share:$SHARE_VERSION
     cd $HOME_FOLDER
-  fi  
+  fi
+
+  # AGS Community Share
+  if [ "$AGS_SHARE" == "true" ]; then
+    cd ags-share
+    docker buildx build . --no-cache --load --platform $PLATFORM \
+    --build-arg AGS_SHARE_VERSION=$AGS_SHARE_VERSION \
+    -t $REPOSITORY/alfresco-governance-share-community:$AGS_SHARE_VERSION
+    cd $HOME_FOLDER  
+  fi
+  
+  # AGS Enterprise Share
+  if [ "$AGS_SHARE_ENT" == "true" ]; then
+    cd ags-share-ent
+    docker buildx build . --no-cache --load --platform $PLATFORM \
+    --build-arg AGS_SHARE_ENT_VERSION=$AGS_SHARE_ENT_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-governance-share-enterprise:$AGS_SHARE_ENT_VERSION
+    cd $HOME_FOLDER  
+  fi
 
   # Search Services 
   if [ "$SEARCH" == "true" ]; then
@@ -240,6 +280,18 @@ do
             REPO_ENT_VERSION=$1
             shift
         ;;
+        ags)
+            AGS="true"
+            shift
+            AGS_VERSION=$1
+            shift
+        ;;
+        ags-ent)
+            AGS_ENT="true"
+            shift
+            AGS_ENT_VERSION=$1
+            shift
+        ;;
         transform)
             TRANSFORM="true"
             shift
@@ -270,6 +322,18 @@ do
             SHARE_VERSION=$1
             shift
         ;;        
+        ags-share)
+            AGS_SHARE="true"
+            shift
+            AGS_SHARE_VERSION=$1
+            shift
+        ;;
+        ags-share-ent)
+            AGS_SHARE_ENT="true"
+            shift
+            AGS_SHARE_ENT_VERSION=$1
+            shift
+        ;;
         search)
             SEARCH="true"
             shift
@@ -311,8 +375,10 @@ do
             echo "Allowed parameters:"
             echo "  repo VERSION"
             echo "  repo-ent VERSION"
+            echo "  ags VERSION"
             echo "  share VERSION"
             echo "  share-ent VERSION"
+            echo "  ags-share VERSION"
             echo "  search VERSION"
             echo "  search-ent VERSION"
             echo "  aca VERSION"
