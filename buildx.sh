@@ -44,6 +44,7 @@ ACA="false"
 PROXY="false"
 PROXY_ENT="false"
 IDENTITY="false"
+ESC_LIVE_INDEXING="false"
 
 function build {
 
@@ -257,6 +258,17 @@ function build {
 
   fi    
 
+  # Elasticsearch Connector
+  if [ "$ESC_LIVE_INDEXING" == "true" ]; then
+
+    cd live-indexing
+    docker buildx build . --load --platform $PLATFORM \
+    --build-arg ESC_VERSION=$ESC_LIVE_INDEXING_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-elasticsearch-live-indexing:$ESC_LIVE_INDEXING_VERSION
+    cd $HOME_FOLDER
+
+  fi
+
   # List Docker Images built (or existing)
   docker images "alfresco/*"
   docker images "quay.io/*"
@@ -370,6 +382,12 @@ do
             IDENTITY_VERSION=$1
             shift
         ;;
+        esc-live-indexing)
+            ESC_LIVE_INDEXING="true"
+            shift
+            ESC_LIVE_INDEXING_VERSION=$1
+            shift
+        ;;
         *)
             echo "An invalid parameter was received: $1"
             echo "Allowed parameters:"
@@ -387,6 +405,7 @@ do
             echo "  shared-file-store-ent VERSION"
             echo "  proxy VERSION"
             echo "  identity VERSION"
+            echo "  esc-live-indexing VERSION"
             exit 1
         ;;
     esac
