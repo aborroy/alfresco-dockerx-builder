@@ -220,14 +220,9 @@ function build {
 
   # ACA
   if [ "$ACA" == true ]; then
-    rm -rf alfresco-content-app
-    git clone git@github.com:Alfresco/alfresco-content-app.git
-    cd alfresco-content-app
-    git checkout $ACA_VERSION || { echo -e >&2 "Available tags:\n$(git tag -l "${ACA_VERSION:0:5}*")"; exit 1; }
-    npm install
-    npm run build
+    cd aca
     docker buildx build . --load --platform $PLATFORM \
-    --build-arg PROJECT_NAME=content-ce \
+    --build-arg ACA_VERSION=$ACA_VERSION \
     -t $REPOSITORY/alfresco-content-app:$ACA_VERSION
     cd $HOME_FOLDER
   fi
