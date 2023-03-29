@@ -193,15 +193,11 @@ function build {
 
   # Shared File Store
   if [ "$SHARED_FILE_STORE" == "true" ]; then
-
     cd shared-file-store
     docker buildx build . --load --platform $PLATFORM \
     --build-arg SHARED_FILE_STORE_VERSION=$SHARED_FILE_STORE_VERSION \
-    --build-arg NEXUS_USER=$NEXUS_USER \
-    --build-arg NEXUS_PASS=$NEXUS_PASS \
     -t quay.io/$REPOSITORY/alfresco-shared-file-store:$SHARED_FILE_STORE_VERSION
     cd $HOME_FOLDER
-
   fi    
 
   # ACA
