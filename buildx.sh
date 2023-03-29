@@ -42,6 +42,7 @@ TRANSFORM_ROUTER="false"
 SHARED_FILE_STORE="false"
 ACA="false"
 ADW="false"
+ACC="false"
 PROXY="false"
 PROXY_ENT="false"
 IDENTITY="false"
@@ -221,6 +222,15 @@ function build {
     cd $HOME_FOLDER
   fi  
 
+  # ACC
+  if [ "$ACC" == true ]; then
+    cd acc
+    docker buildx build . --load --platform $PLATFORM \
+    --build-arg ACC_VERSION=$ACC_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-control-center:$ACC_VERSION
+    cd $HOME_FOLDER
+  fi
+
   # Proxy
   if [ "$PROXY" == "true" ] || [ "$PROXY_ENT" == "true" ]; then
     rm -rf acs-ingress
@@ -359,6 +369,12 @@ do
             ADW_VERSION=$1
             shift
         ;;        
+        acc)
+            ACC="true"
+            shift
+            ACC_VERSION=$1
+            shift
+        ;;
         proxy)
             PROXY="true"
             shift
@@ -396,6 +412,7 @@ do
             echo "  search-ent VERSION"
             echo "  aca VERSION"
             echo "  adw VERSION"
+            echo "  acc VERSION"
             echo "  transform VERSION"
             echo "  transform-router-ent VERSION"
             echo "  shared-file-store-ent VERSION"

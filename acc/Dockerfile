@@ -1,0 +1,31 @@
+ARG ACC_VERSION
+FROM quay.io/alfresco/alfresco-control-center:${ACC_VERSION} AS ACC
+FROM nginxinc/nginx-unprivileged:1.21-alpine
+
+COPY --from=ACC /usr/share/nginx/html/ /usr/share/nginx/html/ 
+COPY --from=ACC /etc/nginx/ /etc/nginx/
+
+
+ENV APP_CONFIG_PROVIDER=$PROVIDER
+ENV APP_CONFIG_AUTH_TYPE=$AUTH_TYPE
+
+ENV APP_CONFIG_OAUTH2_HOST="{protocol}//{hostname}{:port}/auth/realms/alfresco"
+ENV APP_CONFIG_BPM_HOST="{protocol}//{hostname}{:port}"
+ENV APP_CONFIG_ECM_HOST="{protocol}//{hostname}{:port}"
+
+ENV APP_CONFIG_OAUTH2_CLIENTID="alfresco"
+ENV APP_CONFIG_OAUTH2_IMPLICIT_FLOW=true
+ENV APP_CONFIG_OAUTH2_SILENT_LOGIN=true
+ENV APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI="{protocol}//{hostname}{:port}/assets/silent-refresh.html"
+ENV APP_CONFIG_OAUTH2_REDIRECT_LOGIN="/"
+ENV APP_CONFIG_OAUTH2_REDIRECT_LOGOUT="/"
+ENV APP_CONFIG_PLUGIN_AOS=true
+ENV APP_CONFIG_PLUGIN_FOLDER_RULES=true
+ENV APP_CONFIG_PLUGIN_CONTENT_SERVICE=true
+ENV APP_CONFIG_ENABLE_MOBILE_APP_SWITCH=true
+ENV APP_CONFIG_SESSION_TIME_FOR_OPEN_APP_DIALOG_DISPLAY_IN_HOURS="12"
+
+USER 101
+
+ENV BASE_PATH=/
+ENV NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
