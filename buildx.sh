@@ -50,32 +50,16 @@ function build {
 
   # Repository Community
   if [ "$REPO" == "true" ]; then
-
-    rm -rf acs-community-packaging
-    git clone git@github.com:Alfresco/acs-community-packaging.git
-    cd acs-community-packaging
-    git checkout $REPO_COM_VERSION || { echo -e >&2 "Available tags:\n$(git tag -l "${REPO_COM_VERSION:0:5}*")"; exit 1; }
-    REPO_VERSION=$(ggrep -oP '(?<=<dependency.alfresco-community-repo.version>).*?(?=</dependency.alfresco-community-repo.version>)' pom.xml)
-    SHARE_INTERNAL_VERSION=$(ggrep -oP '(?<=<dependency.alfresco-community-share.version>).*?(?=</dependency.alfresco-community-share.version>)' pom.xml)
-
-    rm -rf alfresco-community-repo
-    git clone git@github.com:Alfresco/alfresco-community-repo.git
-    cd alfresco-community-repo
-    git checkout $REPO_VERSION || { echo -e >&2 "Available tags:\n$(git tag -l "${REPO_VERSION:0:5}*")"; exit 1; }
-    mvn clean install -DskipTests
-    cd packaging/docker-alfresco
-    wget https://nexus.alfresco.com/nexus/service/local/repo_groups/public/content/org/alfresco/alfresco-share-base-distribution/$SHARE_INTERNAL_VERSION/alfresco-share-base-distribution-$SHARE_INTERNAL_VERSION.zip \
-    && unzip alfresco-share-base-distribution-*.zip
-    cp alfresco-share-base-distribution-*/amps/* target/amps
-    sed -i '' 's/alfresco-base-tomcat:tomcat9-jre11-centos7.*/alfresco-base-tomcat:tomcat9-jre11-centos7-202209261711/g' Dockerfile
+    cd repo
     docker buildx build . --load --platform $PLATFORM \
+    --build-arg ALFRESCO_VERSION=$REPO_COM_VERSION \
     -t $REPOSITORY/alfresco-content-repository-community:$REPO_COM_VERSION
     cd $HOME_FOLDER
   fi
 
   # Repository Enterprise
   if [ "$REPO_ENT" == "true" ]; then
-    cd repo
+    cd repo-ent
     docker buildx build . --load --platform $PLATFORM \
     --build-arg ALFRESCO_VERSION=$REPO_ENT_VERSION \
     -t quay.io/$REPOSITORY/alfresco-content-repository:$REPO_ENT_VERSION

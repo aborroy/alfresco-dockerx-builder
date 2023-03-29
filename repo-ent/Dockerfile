@@ -1,5 +1,5 @@
 ARG ALFRESCO_VERSION
-FROM alfresco/alfresco-content-repository-community:${ALFRESCO_VERSION} AS REPO
+FROM quay.io/alfresco/alfresco-content-repository:${ALFRESCO_VERSION} AS REPO
 FROM alfresco/alfresco-base-tomcat:tomcat9-jre17-rockylinux8-202209261711
 
 ARG TOMCAT_DIR=/usr/local/tomcat
