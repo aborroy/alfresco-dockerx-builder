@@ -42,7 +42,7 @@ TRANSFORM_ROUTER="false"
 SHARED_FILE_STORE="false"
 ACA="false"
 ADW="false"
-ACC="false"
+AAA="false"
 PROXY="false"
 PROXY_ENT="false"
 IDENTITY="false"
@@ -222,12 +222,12 @@ function build {
     cd $HOME_FOLDER
   fi  
 
-  # ACC
-  if [ "$ACC" == true ]; then
-    cd acc
+  # AAA
+  if [ "$AAA" == true ]; then
+    cd aaa
     docker buildx build . --load --platform $PLATFORM \
-    --build-arg ACC_VERSION=$ACC_VERSION \
-    -t quay.io/$REPOSITORY/alfresco-control-center:$ACC_VERSION
+    --build-arg AAA_VERSION=$AAA_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-admin-app:$AAA_VERSION
     cd $HOME_FOLDER
   fi
 
@@ -369,10 +369,10 @@ do
             ADW_VERSION=$1
             shift
         ;;        
-        acc)
-            ACC="true"
+        aaa)
+            AAA="true"
             shift
-            ACC_VERSION=$1
+            AAA_VERSION=$1
             shift
         ;;
         proxy)
@@ -412,7 +412,7 @@ do
             echo "  search-ent VERSION"
             echo "  aca VERSION"
             echo "  adw VERSION"
-            echo "  acc VERSION"
+            echo "  aaa VERSION"
             echo "  transform VERSION"
             echo "  transform-router-ent VERSION"
             echo "  shared-file-store-ent VERSION"

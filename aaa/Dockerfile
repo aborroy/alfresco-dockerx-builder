@@ -1,10 +1,9 @@
-ARG ACC_VERSION
-FROM quay.io/alfresco/alfresco-control-center:${ACC_VERSION} AS ACC
+ARG AAA_VERSION
+FROM quay.io/alfresco/alfresco-admin-app:${AAA_VERSION} AS AAA
 FROM nginxinc/nginx-unprivileged:1.21-alpine
 
-COPY --from=ACC /usr/share/nginx/html/ /usr/share/nginx/html/ 
-COPY --from=ACC /etc/nginx/ /etc/nginx/
-
+COPY --from=AAA /usr/share/nginx/html/ /usr/share/nginx/html/ 
+COPY --from=AAA /etc/nginx/ /etc/nginx/
 
 ENV APP_CONFIG_PROVIDER=$PROVIDER
 ENV APP_CONFIG_AUTH_TYPE=$AUTH_TYPE
@@ -24,6 +23,8 @@ ENV APP_CONFIG_PLUGIN_FOLDER_RULES=true
 ENV APP_CONFIG_PLUGIN_CONTENT_SERVICE=true
 ENV APP_CONFIG_ENABLE_MOBILE_APP_SWITCH=true
 ENV APP_CONFIG_SESSION_TIME_FOR_OPEN_APP_DIALOG_DISPLAY_IN_HOURS="12"
+
+ENV SERVER_PORT=8080
 
 USER 101
 
