@@ -184,8 +184,6 @@ function build {
     cd transform-router
     docker buildx build . --load --platform $PLATFORM \
     --build-arg TRANSFORM_ROUTER_VERSION=$TRANSFORM_ROUTER_VERSION \
-    --build-arg NEXUS_USER=$NEXUS_USER \
-    --build-arg NEXUS_PASS=$NEXUS_PASS \
     -t quay.io/$REPOSITORY/alfresco-transform-router:$TRANSFORM_ROUTER_VERSION
     cd $HOME_FOLDER
 
