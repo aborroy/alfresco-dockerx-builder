@@ -20,7 +20,7 @@ Following software is required to be installed:
 * [ggrep](https://formulae.brew.sh/formula/grep)
 * [wget](https://formulae.brew.sh/formula/wget)
 
-If you need to build `aca` Docker Image, also `npm` is required.
+Alternatively, [Podman](https://podman-desktop.io) can be used instead of Docker.
 
 ## Building
 
@@ -30,6 +30,13 @@ Available Alfresco Docker Images can be selected by using command line arguments
 
 ```
 $ ./buildx.sh [repo VERSION] [proxy VERSION] [share VERSION] [search VERSION] [aca VERSION]
+```
+
+Building the Images for **Podman** requires to change default configuration to:
+
+```
+PLATFORM=arm64 # Podman
+CONTAINER_BUILD_CMD="podman build . --arch=$PLATFORM" # Podman
 ```
 
 **Sample execution**

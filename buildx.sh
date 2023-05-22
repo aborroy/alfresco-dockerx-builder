@@ -24,7 +24,10 @@ HOME_FOLDER=$PWD
 REPOSITORY=alfresco
 NEXUS_USER=
 NEXUS_PASS=
-PLATFORM=linux/arm64
+PLATFORM=linux/arm64 # Docker
+CONTAINER_BUILD_CMD="docker buildx build . --load --platform $PLATFORM" # Docker
+# PLATFORM=arm64 # Podman
+# CONTAINER_BUILD_CMD="podman build . --arch=$PLATFORM" # Podman
 
 # Docker Images building flags
 REPO="false"
@@ -48,12 +51,13 @@ PROXY_ENT="false"
 IDENTITY="false"
 ESC_LIVE_INDEXING="false"
 
+
 function build {
 
   # Repository Community
   if [ "$REPO" == "true" ]; then
     cd repo
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg ALFRESCO_VERSION=$REPO_COM_VERSION \
     -t $REPOSITORY/alfresco-content-repository-community:$REPO_COM_VERSION
     cd $HOME_FOLDER
@@ -62,7 +66,7 @@ function build {
   # Repository Enterprise
   if [ "$REPO_ENT" == "true" ]; then
     cd repo-ent
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg ALFRESCO_VERSION=$REPO_ENT_VERSION \
     -t quay.io/$REPOSITORY/alfresco-content-repository:$REPO_ENT_VERSION
     cd $HOME_FOLDER
@@ -71,7 +75,7 @@ function build {
   # AGS Community Repo
   if [ "$AGS" == "true" ]; then
     cd ags
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg AGS_VERSION=$AGS_VERSION \
     -t $REPOSITORY/alfresco-governance-repository-community:$AGS_VERSION
     cd $HOME_FOLDER
@@ -80,7 +84,7 @@ function build {
   # AGS Enterprise Repo
   if [ "$AGS_ENT" == "true" ]; then
     cd ags-ent
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg AGS_ENT_VERSION=$AGS_ENT_VERSION \
     -t quay.io/$REPOSITORY/alfresco-governance-repository-enterprise:$AGS_ENT_VERSION
     cd $HOME_FOLDER
@@ -97,7 +101,7 @@ function build {
     cd ..
     
     cd share
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg SHARE_INTERNAL_VERSION=$SHARE_COM_VERSION \
     -t $REPOSITORY/alfresco-share:$SHARE_VERSION
     cd $HOME_FOLDER
@@ -114,7 +118,7 @@ function build {
     cd ..
     
     cd share
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg SHARE_INTERNAL_VERSION=$SHARE_ENT_VERSION \
     -t quay.io/$REPOSITORY/alfresco-share:$SHARE_VERSION
     cd $HOME_FOLDER
@@ -141,7 +145,7 @@ function build {
   # Search Services 
   if [ "$SEARCH" == "true" ]; then
     cd search
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg SEARCH_VERSION=$SEARCH_VERSION \
     --build-arg DIST_DIR=/opt/alfresco-search-services \
     -t $REPOSITORY/alfresco-search-services:$SEARCH_VERSION    
@@ -151,7 +155,7 @@ function build {
   # Search Services Enterprise
   if [ "$SEARCH_ENT" == "true" ]; then
     cd search
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg SEARCH_VERSION=$SEARCH_ENT_VERSION \
     --build-arg NEXUS_USER=$NEXUS_USER \
     --build-arg NEXUS_PASS=$NEXUS_PASS \
@@ -169,7 +173,7 @@ function build {
     rm application-default.yaml
 
     cd transform
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg TRANSFORM_VERSION=$TRANSFORM_VERSION \
     --build-arg IMAGEMAGICK_HOME_FOLDER=$IMAGEMAGICK_HOME_FOLDER \
     --build-arg LIBREOFFICE_HOME_FOLDER=$LIBREOFFICE_HOME_FOLDER \
@@ -182,7 +186,7 @@ function build {
   if [ "$TRANSFORM_ROUTER" == "true" ]; then
 
     cd transform-router
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg TRANSFORM_ROUTER_VERSION=$TRANSFORM_ROUTER_VERSION \
     -t quay.io/$REPOSITORY/alfresco-transform-router:$TRANSFORM_ROUTER_VERSION
     cd $HOME_FOLDER
@@ -192,7 +196,7 @@ function build {
   # Shared File Store
   if [ "$SHARED_FILE_STORE" == "true" ]; then
     cd shared-file-store
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg SHARED_FILE_STORE_VERSION=$SHARED_FILE_STORE_VERSION \
     -t quay.io/$REPOSITORY/alfresco-shared-file-store:$SHARED_FILE_STORE_VERSION
     cd $HOME_FOLDER
@@ -201,7 +205,7 @@ function build {
   # ACA
   if [ "$ACA" == true ]; then
     cd aca
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg ACA_VERSION=$ACA_VERSION \
     -t $REPOSITORY/alfresco-content-app:$ACA_VERSION
     cd $HOME_FOLDER
@@ -210,7 +214,7 @@ function build {
   # ADW
   if [ "$ADW" == true ]; then
     cd adw
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg ADW_VERSION=$ADW_VERSION \
     -t quay.io/$REPOSITORY/alfresco-digital-workspace:$ADW_VERSION
     cd $HOME_FOLDER
@@ -219,7 +223,7 @@ function build {
   # AAA
   if [ "$AAA" == true ]; then
     cd aaa
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg AAA_VERSION=$AAA_VERSION \
     -t quay.io/$REPOSITORY/alfresco-admin-app:$AAA_VERSION
     cd $HOME_FOLDER
@@ -235,7 +239,7 @@ function build {
     if [ "$PROXY_ENT" == "true" ]; then
       PREFIX="quay.io/"
     fi
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     -t $PREFIX$REPOSITORY/alfresco-acs-nginx:$PROXY_VERSION
     cd $HOME_FOLDER
   fi
@@ -244,7 +248,7 @@ function build {
   if [ "$IDENTITY" == "true" ]; then
 
     cd identity
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg IDENTITY_VERSION=$IDENTITY_VERSION \
     -t $REPOSITORY/alfresco-identity-service:$IDENTITY_VERSION
     cd $HOME_FOLDER
@@ -255,7 +259,7 @@ function build {
   if [ "$ESC_LIVE_INDEXING" == "true" ]; then
 
     cd live-indexing
-    docker buildx build . --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD \
     --build-arg ESC_VERSION=$ESC_LIVE_INDEXING_VERSION \
     -t quay.io/$REPOSITORY/alfresco-elasticsearch-live-indexing:$ESC_LIVE_INDEXING_VERSION
     cd $HOME_FOLDER
