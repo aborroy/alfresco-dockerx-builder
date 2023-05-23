@@ -32,11 +32,10 @@ Available Alfresco Docker Images can be selected by using command line arguments
 $ ./buildx.sh [repo VERSION] [proxy VERSION] [share VERSION] [search VERSION] [aca VERSION]
 ```
 
-Building the Images for **Podman** requires to change default configuration to:
+Building the Images for **Podman** requires to add `podman` argument in the command:
 
 ```
-PLATFORM=arm64 # Podman
-CONTAINER_BUILD_CMD="podman build . --arch=$PLATFORM" # Podman
+$ ./buildx.sh podman repo 7.3.0
 ```
 
 **Sample execution**

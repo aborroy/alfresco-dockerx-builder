@@ -24,10 +24,17 @@ HOME_FOLDER=$PWD
 REPOSITORY=alfresco
 NEXUS_USER=
 NEXUS_PASS=
-PLATFORM=linux/arm64 # Docker
-CONTAINER_BUILD_CMD="docker buildx build . --load --platform $PLATFORM" # Docker
-# PLATFORM=arm64 # Podman
-# CONTAINER_BUILD_CMD="podman build . --arch=$PLATFORM" # Podman
+PLATFORM_DOCKER=linux/arm64
+CONTAINER_BUILD_CMD_DOCKER="docker buildx build . --load --platform $PLATFORM_DOCKER"
+CMD_DOCKER=docker
+PLATFORM_PODMAN=arm64
+CONTAINER_BUILD_CMD_PODMAN="podman build . --arch=$PLATFORM_PODMAN"
+CMD_PODMAN=podman
+
+# Default is Docker
+PLATFORM=$PLATFORM_DOCKER
+CONTAINER_BUILD_CMD=$CONTAINER_BUILD_CMD_DOCKER
+CMD=$CMD_DOCKER
 
 # Docker Images building flags
 REPO="false"
@@ -127,7 +134,7 @@ function build {
   # AGS Community Share
   if [ "$AGS_SHARE" == "true" ]; then
     cd ags-share
-    docker buildx build . --no-cache --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD  \
     --build-arg AGS_SHARE_VERSION=$AGS_SHARE_VERSION \
     -t $REPOSITORY/alfresco-governance-share-community:$AGS_SHARE_VERSION
     cd $HOME_FOLDER  
@@ -136,7 +143,7 @@ function build {
   # AGS Enterprise Share
   if [ "$AGS_SHARE_ENT" == "true" ]; then
     cd ags-share-ent
-    docker buildx build . --no-cache --load --platform $PLATFORM \
+    $CONTAINER_BUILD_CMD  \
     --build-arg AGS_SHARE_ENT_VERSION=$AGS_SHARE_ENT_VERSION \
     -t quay.io/$REPOSITORY/alfresco-governance-share-enterprise:$AGS_SHARE_ENT_VERSION
     cd $HOME_FOLDER  
@@ -267,8 +274,8 @@ function build {
   fi
 
   # List Docker Images built (or existing)
-  docker images "alfresco/*"
-  docker images "quay.io/*"
+  $CMD images "alfresco/*"
+  $CMD images "quay.io/*"
 
 }
 
@@ -277,6 +284,16 @@ function build {
 while test $# -gt 0
 do
     case "$1" in
+        podman)
+            PLATFORM=$PLATFORM_PODMAN
+            CONTAINER_BUILD_CMD=$CONTAINER_BUILD_CMD_PODMAN
+            CMD=$CMD_PODMAN
+            shift
+        ;;
+        docker)
+            # Default values fits to Docker
+            shift
+        ;;
         repo)
             REPO="true"
             shift
@@ -422,5 +439,5 @@ do
     esac
 done
 
-# Build Docker Images
+# Build Container Images
 build
