@@ -57,6 +57,7 @@ PROXY="false"
 PROXY_ENT="false"
 IDENTITY="false"
 ESC_LIVE_INDEXING="false"
+ESC_RE_INDEXING="false"
 
 
 function build {
@@ -273,6 +274,17 @@ function build {
 
   fi
 
+  # Elasticsearch Connector Reindexing
+  if [ "$ESC_RE_INDEXING" == "true" ]; then
+
+    cd re-indexing
+    $CONTAINER_BUILD_CMD \
+    --build-arg ESC_VERSION=$ESC_RE_INDEXING_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-elasticsearch-reindexing:$ESC_RE_INDEXING_VERSION
+    cd $HOME_FOLDER
+
+  fi  
+
   # List Docker Images built (or existing)
   $CMD images "alfresco/*"
   $CMD images "quay.io/*"
@@ -414,6 +426,12 @@ do
             ESC_LIVE_INDEXING_VERSION=$1
             shift
         ;;
+        esc-reindexing)
+            ESC_RE_INDEXING="true"
+            shift
+            ESC_RE_INDEXING_VERSION=$1
+            shift
+        ;;
         *)
             echo "An invalid parameter was received: $1"
             echo "Allowed parameters:"
@@ -434,6 +452,7 @@ do
             echo "  proxy VERSION"
             echo "  identity VERSION"
             echo "  esc-live-indexing VERSION"
+            echo "  esc-reindexing VERSION"
             exit 1
         ;;
     esac
