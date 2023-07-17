@@ -51,7 +51,7 @@ RUN ln -s /usr/lib64/libreoffice ${LIBREOFFICE_HOME_FOLDER}
 RUN echo 'convert -thumbnail x100 -background white -alpha remove $1[0] $2' >> /usr/bin/alfresco-pdf-renderer && \
     chmod +x /usr/bin/alfresco-pdf-renderer
 
-RUN if [[ $TRANSFORM_VERSION = 3* ]]; then \
+RUN if [[ $TRANSFORM_VERSION = 3* || $TRANSFORM_VERSION = 4* ]]; then \
       wget https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-transform-core-aio/$TRANSFORM_VERSION/alfresco-transform-core-aio-$TRANSFORM_VERSION.jar && \
       cp alfresco-transform-core-aio-$TRANSFORM_VERSION.jar /usr/bin && \
       ln /usr/bin/alfresco-transform-core-aio-$TRANSFORM_VERSION.jar /usr/bin/alfresco-transform-core-aio.jar; \
