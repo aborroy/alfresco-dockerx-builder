@@ -48,6 +48,11 @@ AGS_SHARE_ENT="false"
 SEARCH="false"
 SEARCH_ENT="false"
 TRANSFORM="false"
+T_LIBREOFFICE="false"
+T_IMAGEMAGICK="false"
+T_MISC="false"
+T_PDF_RENDERER="false"
+T_TIKA="false"
 TRANSFORM_ROUTER="false"
 SHARED_FILE_STORE="false"
 ACA="false"
@@ -176,8 +181,8 @@ function build {
   if [ "$TRANSFORM" == "true" ]; then
 
     wget https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$TRANSFORM_VERSION/engines/aio/src/main/resources/application-default.yaml
-    IMAGEMAGICK_HOME_FOLDER=$(ggrep -oP '(?<=path: \$\{LIBREOFFICE_HOME:).*?(?=\})' application-default.yaml)
-    LIBREOFFICE_HOME_FOLDER=$(ggrep -oP '(?<=root: \$\{IMAGEMAGICK_ROOT:).*?(?=\})' application-default.yaml)
+    LIBREOFFICE_HOME_FOLDER=$(ggrep -oP '(?<=path: \$\{LIBREOFFICE_HOME:).*?(?=\})' application-default.yaml)
+    IMAGEMAGICK_HOME_FOLDER=$(ggrep -oP '(?<=root: \$\{IMAGEMAGICK_ROOT:).*?(?=\})' application-default.yaml)
     rm application-default.yaml
 
     cd transform
@@ -188,6 +193,76 @@ function build {
     -t $REPOSITORY/alfresco-transform-core-aio:$TRANSFORM_VERSION
     cd $HOME_FOLDER
 
+  fi
+
+  # T-LibreOffice
+  if [ "$T_LIBREOFFICE" == "true" ]; then
+
+    wget https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$T_LIBREOFFICE_VERSION/engines/aio/src/main/resources/application-default.yaml
+    LIBREOFFICE_HOME_FOLDER=$(ggrep -oP '(?<=path: \$\{LIBREOFFICE_HOME:).*?(?=\})' application-default.yaml)
+    rm application-default.yaml  
+
+    cd t-libreoffice
+    $CONTAINER_BUILD_CMD \
+    --build-arg TRANSFORM_VERSION=$T_LIBREOFFICE_VERSION \
+    --build-arg LIBREOFFICE_HOME_FOLDER=$LIBREOFFICE_HOME_FOLDER \
+    -t $REPOSITORY/alfresco-libreoffice:$T_LIBREOFFICE_VERSION
+    cd $HOME_FOLDER
+  
+  fi
+
+  # T-ImageMagick
+  if [ "$T_IMAGEMAGICK" == "true" ]; then
+
+    wget https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$T_IMAGEMAGICK_VERSION/engines/aio/src/main/resources/application-default.yaml
+    IMAGEMAGICK_HOME_FOLDER=$(ggrep -oP '(?<=root: \$\{IMAGEMAGICK_ROOT:).*?(?=\})' application-default.yaml)
+    rm application-default.yaml  
+
+    cd t-imagemagick
+    $CONTAINER_BUILD_CMD \
+    --build-arg TRANSFORM_VERSION=$T_IMAGEMAGICK_VERSION \
+    --build-arg IMAGEMAGICK_HOME_FOLDER=$IMAGEMAGICK_HOME_FOLDER \
+    -t $REPOSITORY/alfresco-imagemagick:$T_IMAGEMAGICK_VERSION
+    cd $HOME_FOLDER
+  
+  fi
+
+  # T-Tika
+  if [ "$T_TIKA" == "true" ]; then
+
+    cd t-tika
+    $CONTAINER_BUILD_CMD \
+    --build-arg TRANSFORM_VERSION=$T_TIKA_VERSION \
+    -t $REPOSITORY/alfresco-tika:$T_TIKA_VERSION
+    cd $HOME_FOLDER
+  
+  fi    
+
+  # T-PdfRenderer
+  if [ "$T_PDF_RENDERER" == "true" ]; then
+
+    wget https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$T_PDF_RENDERER_VERSION/engines/aio/src/main/resources/application-default.yaml
+    IMAGEMAGICK_HOME_FOLDER=$(ggrep -oP '(?<=root: \$\{IMAGEMAGICK_ROOT:).*?(?=\})' application-default.yaml)
+    rm application-default.yaml
+
+    cd t-pdf-renderer
+    $CONTAINER_BUILD_CMD \
+    --build-arg TRANSFORM_VERSION=$T_PDF_RENDERER_VERSION \
+    --build-arg IMAGEMAGICK_HOME_FOLDER=$IMAGEMAGICK_HOME_FOLDER \
+    -t $REPOSITORY/alfresco-pdf-renderer:$T_PDF_RENDERER_VERSION
+    cd $HOME_FOLDER
+  
+  fi
+
+  # T-Misc
+  if [ "$T_MISC" == "true" ]; then
+
+    cd t-misc
+    $CONTAINER_BUILD_CMD \
+    --build-arg TRANSFORM_VERSION=$T_MISC_VERSION \
+    -t $REPOSITORY/alfresco-transform-misc:$T_MISC_VERSION
+    cd $HOME_FOLDER
+  
   fi
 
   # Transform Router
@@ -336,6 +411,36 @@ do
             TRANSFORM_VERSION=$1
             shift
         ;;
+        t-libreoffice)
+            T_LIBREOFFICE="true"
+            shift
+            T_LIBREOFFICE_VERSION=$1
+            shift
+        ;;
+        t-tika)
+            T_TIKA="true"
+            shift
+            T_TIKA_VERSION=$1
+            shift
+        ;;
+        t-pdf-renderer)
+            T_PDF_RENDERER="true"
+            shift
+            T_PDF_RENDERER_VERSION=$1
+            shift
+        ;;
+        t-imagemagick)
+            T_IMAGEMAGICK="true"
+            shift
+            T_IMAGEMAGICK_VERSION=$1
+            shift
+        ;;
+        t-misc)
+            T_MISC="true"
+            shift
+            T_MISC_VERSION=$1
+            shift
+        ;;
         transform-router-ent)
             TRANSFORM_ROUTER="true"
             shift
@@ -447,6 +552,11 @@ do
             echo "  adw VERSION"
             echo "  aaa VERSION"
             echo "  transform VERSION"
+            echo "  t-libreoffice VERSION"
+            echo "  t-pdf-renderer VERSION"
+            echo "  t-tika VERSION"
+            echo "  t-imagemagick VERSION"
+            echo "  t-misc VERSION"
             echo "  transform-router-ent VERSION"
             echo "  shared-file-store-ent VERSION"
             echo "  proxy VERSION"
