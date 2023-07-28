@@ -62,6 +62,10 @@ PROXY="false"
 PROXY_ENT="false"
 IDENTITY="false"
 ESC_LIVE_INDEXING="false"
+ESC_LIVE_MEDIATION="false"
+ESC_LIVE_CONTENT="false"
+ESC_LIVE_METADATA="false"
+ESC_LIVE_PATH="false"
 ESC_RE_INDEXING="false"
 
 
@@ -349,6 +353,50 @@ function build {
 
   fi
 
+  # Elasticsearch Connector - Mediation
+  if [ "$ESC_LIVE_MEDIATION" == "true" ]; then
+
+    cd live-indexing-mediation
+    $CONTAINER_BUILD_CMD \
+    --build-arg ESC_VERSION=$ESC_LIVE_MEDIATION_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-elasticsearch-live-indexing-mediation:$ESC_LIVE_MEDIATION_VERSION
+    cd $HOME_FOLDER
+
+  fi
+
+  # Elasticsearch Connector - Content
+  if [ "$ESC_LIVE_CONTENT" == "true" ]; then
+
+    cd live-indexing-content
+    $CONTAINER_BUILD_CMD \
+    --build-arg ESC_VERSION=$ESC_LIVE_CONTENT_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-elasticsearch-live-indexing-content:$ESC_LIVE_CONTENT_VERSION
+    cd $HOME_FOLDER
+
+  fi
+
+  # Elasticsearch Connector - Metadata
+  if [ "$ESC_LIVE_METADATA" == "true" ]; then
+
+    cd live-indexing-metadata
+    $CONTAINER_BUILD_CMD \
+    --build-arg ESC_VERSION=$ESC_LIVE_METADATA_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-elasticsearch-live-indexing-metadata:$ESC_LIVE_METADATA_VERSION
+    cd $HOME_FOLDER
+
+  fi
+
+  # Elasticsearch Connector - Path
+  if [ "$ESC_LIVE_PATH" == "true" ]; then
+
+    cd live-indexing-path
+    $CONTAINER_BUILD_CMD \
+    --build-arg ESC_VERSION=$ESC_LIVE_PATH_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-elasticsearch-live-indexing-path:$ESC_LIVE_PATH_VERSION
+    cd $HOME_FOLDER
+
+  fi        
+
   # Elasticsearch Connector Reindexing
   if [ "$ESC_RE_INDEXING" == "true" ]; then
 
@@ -531,6 +579,30 @@ do
             ESC_LIVE_INDEXING_VERSION=$1
             shift
         ;;
+        esc-live-mediation)
+            ESC_LIVE_MEDIATION="true"
+            shift
+            ESC_LIVE_MEDIATION_VERSION=$1
+            shift
+        ;;
+        esc-live-content)
+            ESC_LIVE_CONTENT="true"
+            shift
+            ESC_LIVE_CONTENT_VERSION=$1
+            shift
+        ;;
+        esc-live-metadata)
+            ESC_LIVE_METADATA="true"
+            shift
+            ESC_LIVE_METADATA_VERSION=$1
+            shift
+        ;;       
+        esc-live-path)
+            ESC_LIVE_PATH="true"
+            shift
+            ESC_LIVE_PATH_VERSION=$1
+            shift
+        ;;         
         esc-reindexing)
             ESC_RE_INDEXING="true"
             shift
@@ -562,6 +634,10 @@ do
             echo "  proxy VERSION"
             echo "  identity VERSION"
             echo "  esc-live-indexing VERSION"
+            echo "  esc-live-mediation VERSION"
+            echo "  esc-live-content VERSION"
+            echo "  esc-live-metadata VERSION"
+            echo "  esc-live-path VERSION"
             echo "  esc-reindexing VERSION"
             exit 1
         ;;
