@@ -184,7 +184,13 @@ function build {
   # Transform Service
   if [ "$TRANSFORM" == "true" ]; then
 
-    wget https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$TRANSFORM_VERSION/engines/aio/src/main/resources/application-default.yaml
+    if wget -q --method=HEAD https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$TRANSFORM_VERSION/engines/aio/src/main/resources/application-default.yaml;
+    then
+      wget https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$TRANSFORM_VERSION/engines/aio/src/main/resources/application-default.yaml
+    else
+      wget https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$TRANSFORM_VERSION/alfresco-transform-core-aio/alfresco-transform-core-aio-boot/src/main/resources/application-default.yaml
+    fi  
+
     LIBREOFFICE_HOME_FOLDER=$(ggrep -oP '(?<=path: \$\{LIBREOFFICE_HOME:).*?(?=\})' application-default.yaml)
     IMAGEMAGICK_HOME_FOLDER=$(ggrep -oP '(?<=root: \$\{IMAGEMAGICK_ROOT:).*?(?=\})' application-default.yaml)
     rm application-default.yaml
