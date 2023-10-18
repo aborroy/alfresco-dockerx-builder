@@ -57,7 +57,7 @@ TRANSFORM_ROUTER="false"
 SHARED_FILE_STORE="false"
 ACA="false"
 ADW="false"
-AAA="false"
+CONTROL_CENTER="false"
 PROXY="false"
 PROXY_ENT="false"
 IDENTITY="false"
@@ -313,12 +313,12 @@ function build {
     cd $HOME_FOLDER
   fi  
 
-  # AAA
-  if [ "$AAA" == true ]; then
-    cd aaa
+  # Control Center
+  if [ "$CONTROL_CENTER" == true ]; then
+    cd control-center
     $CONTAINER_BUILD_CMD \
-    --build-arg AAA_VERSION=$AAA_VERSION \
-    -t quay.io/$REPOSITORY/alfresco-admin-app:$AAA_VERSION
+    --build-arg CONTROL_CENTER_VERSION=$CONTROL_CENTER_VERSION \
+    -t quay.io/$REPOSITORY/alfresco-control-center:$CONTROL_CENTER_VERSION
     cd $HOME_FOLDER
   fi
 
@@ -555,10 +555,10 @@ do
             ADW_VERSION=$1
             shift
         ;;        
-        aaa)
-            AAA="true"
+        control-center)
+            CONTROL_CENTER="true"
             shift
-            AAA_VERSION=$1
+            CONTROL_CENTER_VERSION=$1
             shift
         ;;
         proxy)
@@ -628,7 +628,7 @@ do
             echo "  search-ent VERSION"
             echo "  aca VERSION"
             echo "  adw VERSION"
-            echo "  aaa VERSION"
+            echo "  control-center VERSION"
             echo "  transform VERSION"
             echo "  t-libreoffice VERSION"
             echo "  t-pdf-renderer VERSION"
