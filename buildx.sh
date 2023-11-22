@@ -68,11 +68,20 @@ ESC_LIVE_METADATA="false"
 ESC_LIVE_PATH="false"
 ESC_RE_INDEXING="false"
 
+function checkIfExists() {
+  if [[ $(docker manifest inspect $1 | grep "arm64") ]]; then
+    echo "Docker Image $1 is available in ARM64. You can use default Image from Docker Repository."
+    exit 1
+  fi
+}
 
 function build {
 
   # Repository Community
   if [ "$REPO" == "true" ]; then
+
+    checkIfExists "$REPOSITORY/alfresco-content-repository-community:$REPO_COM_VERSION"
+
     cd repo
     $CONTAINER_BUILD_CMD \
     --build-arg ALFRESCO_VERSION=$REPO_COM_VERSION \
@@ -82,6 +91,9 @@ function build {
 
   # Repository Enterprise
   if [ "$REPO_ENT" == "true" ]; then
+
+    checkIfExists "quay.io/$REPOSITORY/alfresco-content-repository:$REPO_ENT_VERSION"
+
     cd repo-ent
     $CONTAINER_BUILD_CMD \
     --build-arg ALFRESCO_VERSION=$REPO_ENT_VERSION \
@@ -91,6 +103,9 @@ function build {
 
   # AGS Community Repo
   if [ "$AGS" == "true" ]; then
+
+    checkIfExists "$REPOSITORY/alfresco-governance-repository-community:$AGS_VERSION"
+
     cd ags
     $CONTAINER_BUILD_CMD \
     --build-arg AGS_VERSION=$AGS_VERSION \
@@ -100,6 +115,9 @@ function build {
 
   # AGS Enterprise Repo
   if [ "$AGS_ENT" == "true" ]; then
+
+    checkIfExists "quay.io/$REPOSITORY/alfresco-governance-repository-enterprise:$AGS_ENT_VERSION"
+
     cd ags-ent
     $CONTAINER_BUILD_CMD \
     --build-arg AGS_ENT_VERSION=$AGS_ENT_VERSION \
@@ -109,6 +127,8 @@ function build {
 
   # Share
   if [ "$SHARE" == "true" ]; then
+
+    checkIfExists "$REPOSITORY/alfresco-share:$SHARE_VERSION"
 
     rm -rf acs-community-packaging
     git clone git@github.com:Alfresco/acs-community-packaging.git
@@ -127,6 +147,8 @@ function build {
   # Share Enterprise
   if [ "$SHARE_ENT" == "true" ]; then
 
+    checkIfExists "quay.io/$REPOSITORY/alfresco-share:$SHARE_VERSION"
+
     rm -rf acs-packaging
     git clone git@github.com:Alfresco/acs-packaging.git
     cd acs-packaging
@@ -143,6 +165,9 @@ function build {
 
   # AGS Community Share
   if [ "$AGS_SHARE" == "true" ]; then
+
+    checkIfExists "$REPOSITORY/alfresco-governance-share-community:$AGS_SHARE_VERSION"
+
     cd ags-share
     $CONTAINER_BUILD_CMD  \
     --build-arg AGS_SHARE_VERSION=$AGS_SHARE_VERSION \
@@ -152,6 +177,9 @@ function build {
   
   # AGS Enterprise Share
   if [ "$AGS_SHARE_ENT" == "true" ]; then
+
+    checkIfExists "quay.io/$REPOSITORY/alfresco-governance-share-enterprise:$AGS_SHARE_ENT_VERSION"
+
     cd ags-share-ent
     $CONTAINER_BUILD_CMD  \
     --build-arg AGS_SHARE_ENT_VERSION=$AGS_SHARE_ENT_VERSION \
@@ -161,6 +189,9 @@ function build {
 
   # Search Services 
   if [ "$SEARCH" == "true" ]; then
+
+    checkIfExists "$REPOSITORY/alfresco-search-services:$SEARCH_VERSION"
+
     cd search
     $CONTAINER_BUILD_CMD \
     --build-arg SEARCH_VERSION=$SEARCH_VERSION \
@@ -171,6 +202,9 @@ function build {
 
   # Search Services Enterprise
   if [ "$SEARCH_ENT" == "true" ]; then
+
+    checkIfExists "quay.io/$REPOSITORY/alfresco-insight-engine:$SEARCH_ENT_VERSION"
+
     cd search
     $CONTAINER_BUILD_CMD \
     --build-arg SEARCH_VERSION=$SEARCH_ENT_VERSION \
@@ -183,6 +217,8 @@ function build {
 
   # Transform Service
   if [ "$TRANSFORM" == "true" ]; then
+
+    checkIfExists "$REPOSITORY/alfresco-transform-core-aio:$TRANSFORM_VERSION"
 
     if wget -q --method=HEAD https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$TRANSFORM_VERSION/engines/aio/src/main/resources/application-default.yaml;
     then
@@ -208,6 +244,8 @@ function build {
   # T-LibreOffice
   if [ "$T_LIBREOFFICE" == "true" ]; then
 
+    checkIfExists "$REPOSITORY/alfresco-libreoffice:$T_LIBREOFFICE_VERSION"
+
     wget https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$T_LIBREOFFICE_VERSION/engines/aio/src/main/resources/application-default.yaml
     LIBREOFFICE_HOME_FOLDER=$(ggrep -oP '(?<=path: \$\{LIBREOFFICE_HOME:).*?(?=\})' application-default.yaml)
     rm application-default.yaml  
@@ -223,6 +261,8 @@ function build {
 
   # T-ImageMagick
   if [ "$T_IMAGEMAGICK" == "true" ]; then
+
+    checkIfExists "$REPOSITORY/alfresco-imagemagick:$T_IMAGEMAGICK_VERSION"
 
     wget https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$T_IMAGEMAGICK_VERSION/engines/aio/src/main/resources/application-default.yaml
     IMAGEMAGICK_HOME_FOLDER=$(ggrep -oP '(?<=root: \$\{IMAGEMAGICK_ROOT:).*?(?=\})' application-default.yaml)
@@ -240,6 +280,8 @@ function build {
   # T-Tika
   if [ "$T_TIKA" == "true" ]; then
 
+    checkIfExists "$REPOSITORY/alfresco-tika:$T_TIKA_VERSION"
+
     cd t-tika
     $CONTAINER_BUILD_CMD \
     --build-arg TRANSFORM_VERSION=$T_TIKA_VERSION \
@@ -250,6 +292,8 @@ function build {
 
   # T-PdfRenderer
   if [ "$T_PDF_RENDERER" == "true" ]; then
+
+    checkIfExists "$REPOSITORY/alfresco-pdf-renderer:$T_PDF_RENDERER_VERSION"
 
     wget https://raw.githubusercontent.com/Alfresco/alfresco-transform-core/$T_PDF_RENDERER_VERSION/engines/aio/src/main/resources/application-default.yaml
     IMAGEMAGICK_HOME_FOLDER=$(ggrep -oP '(?<=root: \$\{IMAGEMAGICK_ROOT:).*?(?=\})' application-default.yaml)
@@ -267,6 +311,8 @@ function build {
   # T-Misc
   if [ "$T_MISC" == "true" ]; then
 
+    checkIfExists "$REPOSITORY/alfresco-transform-misc:$T_MISC_VERSION"
+
     cd t-misc
     $CONTAINER_BUILD_CMD \
     --build-arg TRANSFORM_VERSION=$T_MISC_VERSION \
@@ -278,6 +324,8 @@ function build {
   # Transform Router
   if [ "$TRANSFORM_ROUTER" == "true" ]; then
 
+    checkIfExists "quay.io/$REPOSITORY/alfresco-transform-router:$TRANSFORM_ROUTER_VERSION"
+
     cd transform-router
     $CONTAINER_BUILD_CMD \
     --build-arg TRANSFORM_ROUTER_VERSION=$TRANSFORM_ROUTER_VERSION \
@@ -288,6 +336,9 @@ function build {
 
   # Shared File Store
   if [ "$SHARED_FILE_STORE" == "true" ]; then
+
+    checkIfExists "quay.io/$REPOSITORY/alfresco-shared-file-store:$SHARED_FILE_STORE_VERSION"
+
     cd shared-file-store
     $CONTAINER_BUILD_CMD \
     --build-arg SHARED_FILE_STORE_VERSION=$SHARED_FILE_STORE_VERSION \
@@ -351,6 +402,8 @@ function build {
   # Elasticsearch Connector
   if [ "$ESC_LIVE_INDEXING" == "true" ]; then
 
+    checkIfExists "quay.io/$REPOSITORY/alfresco-elasticsearch-live-indexing:$ESC_LIVE_INDEXING_VERSION"
+
     cd live-indexing
     $CONTAINER_BUILD_CMD \
     --build-arg ESC_VERSION=$ESC_LIVE_INDEXING_VERSION \
@@ -361,6 +414,8 @@ function build {
 
   # Elasticsearch Connector - Mediation
   if [ "$ESC_LIVE_MEDIATION" == "true" ]; then
+
+    checkIfExists "quay.io/$REPOSITORY/alfresco-elasticsearch-live-indexing-mediation:$ESC_LIVE_MEDIATION_VERSION"
 
     cd live-indexing-mediation
     $CONTAINER_BUILD_CMD \
@@ -373,6 +428,8 @@ function build {
   # Elasticsearch Connector - Content
   if [ "$ESC_LIVE_CONTENT" == "true" ]; then
 
+    checkIfExists "quay.io/$REPOSITORY/alfresco-elasticsearch-live-indexing-content:$ESC_LIVE_CONTENT_VERSION"
+
     cd live-indexing-content
     $CONTAINER_BUILD_CMD \
     --build-arg ESC_VERSION=$ESC_LIVE_CONTENT_VERSION \
@@ -383,6 +440,8 @@ function build {
 
   # Elasticsearch Connector - Metadata
   if [ "$ESC_LIVE_METADATA" == "true" ]; then
+
+    checkIfExists "quay.io/$REPOSITORY/alfresco-elasticsearch-live-indexing-metadata:$ESC_LIVE_METADATA_VERSION"
 
     cd live-indexing-metadata
     $CONTAINER_BUILD_CMD \
@@ -395,6 +454,8 @@ function build {
   # Elasticsearch Connector - Path
   if [ "$ESC_LIVE_PATH" == "true" ]; then
 
+    checkIfExists "quay.io/$REPOSITORY/alfresco-elasticsearch-live-indexing-path:$ESC_LIVE_PATH_VERSION"
+
     cd live-indexing-path
     $CONTAINER_BUILD_CMD \
     --build-arg ESC_VERSION=$ESC_LIVE_PATH_VERSION \
@@ -405,6 +466,8 @@ function build {
 
   # Elasticsearch Connector Reindexing
   if [ "$ESC_RE_INDEXING" == "true" ]; then
+
+    checkIfExists "quay.io/$REPOSITORY/alfresco-elasticsearch-reindexing:$ESC_RE_INDEXING_VERSION"
 
     cd re-indexing
     $CONTAINER_BUILD_CMD \
